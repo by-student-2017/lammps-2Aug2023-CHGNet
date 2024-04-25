@@ -357,6 +357,8 @@ void PairM3GNet::finalizePython()
         return;
     }
 
+    this->initializedPython = 0;
+
     Py_XDECREF(this->pyFunc);
     Py_XDECREF(this->pyModule);
 
