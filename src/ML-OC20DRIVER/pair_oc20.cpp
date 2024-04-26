@@ -27,6 +27,12 @@ PairOC20::PairOC20(LAMMPS *lmp) : Pair(lmp)
     this->pythonPaths       = nullptr;
     this->pyModule          = nullptr;
     this->pyFunc            = nullptr;
+
+    if (!PairOC20::finalized)
+    {
+        PairOC20::finalized = 1;
+        std:atexit(PairOC20::finalize);
+    }
 }
 
 PairOC20::~PairOC20()
@@ -65,6 +71,13 @@ PairOC20::~PairOC20()
     {
         this->finalizePython();
     }
+}
+
+int PairOC20::finalized = 0;
+
+void PairOC20::finalize()
+{
+    if(Py_IsInitialized()) Py_Finalize();
 }
 
 void PairOC20::allocate()
@@ -352,7 +365,9 @@ void PairOC20::finalizePython()
     Py_XDECREF(this->pyFunc);
     Py_XDECREF(this->pyModule);
 
-    Py_Finalize();
+    // Py_Finalize() does not work well, because of the following bug:
+    // https://python.readthedocs.io/fr/latest/c-api/init.html#c.Py_FinalizeEx
+    //if(Py_IsInitialized()) Py_Finalize();
 }
 
 double PairOC20::initializePython(const char *name, int gpu)
@@ -374,7 +389,7 @@ double PairOC20::initializePython(const char *name, int gpu)
     PyObject* pyArg2   = nullptr;
     PyObject* pyValue  = nullptr;
 
-    Py_Initialize();
+    if (!Py_IsInitialized()) Py_Initialize();
 
     pySys  = PyImport_ImportModule("sys");
     pyPath = PyObject_GetAttrString(pySys, "path");
@@ -469,7 +484,7 @@ double PairOC20::initializePython(const char *name, int gpu)
         Py_XDECREF(pyFunc);
         Py_XDECREF(pyModule);
 
-        Py_Finalize();
+        if(Py_IsInitialized()) Py_Finalize();
 
         error->all(FLERR, "Cannot initialize python for pair_coeff of OC20.");
     }

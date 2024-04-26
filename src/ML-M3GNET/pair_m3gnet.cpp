@@ -28,6 +28,12 @@ PairM3GNet::PairM3GNet(LAMMPS *lmp) : Pair(lmp)
     this->pythonPaths       = nullptr;
     this->pyModule          = nullptr;
     this->pyFunc            = nullptr;
+
+    if (!PairM3GNet::finalized)
+    {
+        PairM3GNet::finalized = 1;
+        std:atexit(PairM3GNet::finalize);
+    }
 }
 
 PairM3GNet::~PairM3GNet()
@@ -67,6 +73,13 @@ PairM3GNet::~PairM3GNet()
     {
         this->finalizePython();
     }
+}
+
+int PairM3GNet::finalized = 0;
+
+void PairM3GNet::finalize()
+{
+    if(Py_IsInitialized()) Py_Finalize();
 }
 
 void PairM3GNet::allocate()
@@ -368,7 +381,9 @@ void PairM3GNet::finalizePython()
     Py_XDECREF(this->pyFunc);
     Py_XDECREF(this->pyModule);
 
-    Py_Finalize();
+    // Py_Finalize() does not work well, because of the following bug:
+    // https://python.readthedocs.io/fr/latest/c-api/init.html#c.Py_FinalizeEx
+    //if(Py_IsInitialized()) Py_Finalize();
 }
 
 double PairM3GNet::initializePython(const char *name, int dftd3, int gpu)
@@ -391,7 +406,7 @@ double PairM3GNet::initializePython(const char *name, int dftd3, int gpu)
     PyObject* pyArg3   = nullptr;
     PyObject* pyValue  = nullptr;
 
-    Py_Initialize();
+    if (!Py_IsInitialized()) Py_Initialize();
 
     pySys  = PyImport_ImportModule("sys");
     pyPath = PyObject_GetAttrString(pySys, "path");
@@ -496,7 +511,7 @@ double PairM3GNet::initializePython(const char *name, int dftd3, int gpu)
         Py_XDECREF(pyFunc);
         Py_XDECREF(pyModule);
 
-        Py_Finalize();
+        if(Py_IsInitialized()) Py_Finalize();
 
         error->all(FLERR, "Cannot initialize python for pair_coeff of M3GNet.");
     }

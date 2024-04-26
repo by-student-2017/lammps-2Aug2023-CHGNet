@@ -26,6 +26,12 @@ PairCHGNet::PairCHGNet(LAMMPS *lmp) : Pair(lmp)
     this->pythonPaths       = nullptr;
     this->pyModule          = nullptr;
     this->pyFunc            = nullptr;
+
+    if (!PairCHGNet::finalized)
+    {
+        PairCHGNet::finalized = 1;
+        std:atexit(PairCHGNet::finalize);
+    }
 }
 
 PairCHGNet::~PairCHGNet()
@@ -65,6 +71,13 @@ PairCHGNet::~PairCHGNet()
     {
         this->finalizePython();
     }
+}
+
+int PairCHGNet::finalized = 0;
+
+void PairCHGNet::finalize()
+{
+    if(Py_IsInitialized()) Py_Finalize();
 }
 
 void PairCHGNet::allocate()
@@ -376,7 +389,9 @@ void PairCHGNet::finalizePython()
     Py_XDECREF(this->pyFunc);
     Py_XDECREF(this->pyModule);
 
-    Py_Finalize();
+    // Py_Finalize() does not work well, because of the following bug:
+    // https://python.readthedocs.io/fr/latest/c-api/init.html#c.Py_FinalizeEx
+    //if(Py_IsInitialized()) Py_Finalize();
 }
 
 double PairCHGNet::initializePython(const char *name, int as_path, int dftd3, int gpu)
@@ -400,7 +415,7 @@ double PairCHGNet::initializePython(const char *name, int as_path, int dftd3, in
     PyObject* pyArg4   = nullptr;
     PyObject* pyValue  = nullptr;
 
-    Py_Initialize();
+    if (!Py_IsInitialized()) Py_Initialize();
 
     pySys  = PyImport_ImportModule("sys");
     pyPath = PyObject_GetAttrString(pySys, "path");
@@ -499,7 +514,7 @@ double PairCHGNet::initializePython(const char *name, int as_path, int dftd3, in
         Py_XDECREF(pyFunc);
         Py_XDECREF(pyModule);
 
-        Py_Finalize();
+        if(Py_IsInitialized()) Py_Finalize();
 
         error->all(FLERR, "Cannot initialize python for pair_coeff of CHGNet.");
     }

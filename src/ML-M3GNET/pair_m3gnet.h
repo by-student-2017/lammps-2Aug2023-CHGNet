@@ -15,6 +15,7 @@ PairStyle(m3gnet, PairM3GNet)
 #define LMP_PAIR_M3GNET_H_
 
 #include <Python.h>
+#include <cstdlib>
 #include "atom.h"
 #include "comm.h"
 #include "error.h"
@@ -85,6 +86,9 @@ private:
     int elementToAtomNum(const char *elem);
 
     void toRealElement(char *elem);
+
+    static int  finalized;
+    static void finalize();
 };
 
 }  // namespace LAMMPS_NS
