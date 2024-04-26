@@ -32,7 +32,7 @@ PairM3GNet::PairM3GNet(LAMMPS *lmp) : Pair(lmp)
     if (!PairM3GNet::finalized)
     {
         PairM3GNet::finalized = 1;
-        std:atexit(PairM3GNet::finalize);
+        std::atexit(PairM3GNet::finalize);
     }
 }
 

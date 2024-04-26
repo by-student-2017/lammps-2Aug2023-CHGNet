@@ -31,7 +31,7 @@ PairOC20::PairOC20(LAMMPS *lmp) : Pair(lmp)
     if (!PairOC20::finalized)
     {
         PairOC20::finalized = 1;
-        std:atexit(PairOC20::finalize);
+        std::atexit(PairOC20::finalize);
     }
 }
 

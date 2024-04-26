@@ -30,7 +30,7 @@ PairCHGNet::PairCHGNet(LAMMPS *lmp) : Pair(lmp)
     if (!PairCHGNet::finalized)
     {
         PairCHGNet::finalized = 1;
-        std:atexit(PairCHGNet::finalize);
+        std::atexit(PairCHGNet::finalize);
     }
 }
 
