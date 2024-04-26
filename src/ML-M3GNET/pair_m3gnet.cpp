@@ -393,6 +393,8 @@ double PairM3GNet::initializePython(const char *name, int dftd3, int gpu)
         return this->cutoff;
     }
 
+    bool matgl = false;
+
     double cutoff = -1.0;
 
     PyObject* pySys    = nullptr;
@@ -433,10 +435,12 @@ double PairM3GNet::initializePython(const char *name, int dftd3, int gpu)
 
     if (strcmp(name, "MP-2021.2.8-EFS") == 0)
     {
+        matgl  = false;
         pyName = PyUnicode_DecodeFSDefault("m3gnet_driver");
     }
     else
     {
+        matgl  = true;
         pyName = PyUnicode_DecodeFSDefault("matgl_driver");
     }
 
@@ -454,12 +458,16 @@ double PairM3GNet::initializePython(const char *name, int dftd3, int gpu)
         {
             pyArg1 = PyUnicode_FromString(name);
             pyArg2 = PyBool_FromLong(dftd3);
-            pyArg3 = PyBool_FromLong(gpu);
 
-            pyArgs = PyTuple_New(3);
+            pyArgs = PyTuple_New(matgl ? 3 : 2);
             PyTuple_SetItem(pyArgs, 0, pyArg1);
             PyTuple_SetItem(pyArgs, 1, pyArg2);
-            PyTuple_SetItem(pyArgs, 2, pyArg3);
+
+            if (matgl)
+            {
+                pyArg3 = PyBool_FromLong(gpu);
+                PyTuple_SetItem(pyArgs, 2, pyArg3);
+            }
 
             pyValue = PyObject_CallObject(pyFunc, pyArgs);
 
