@@ -21,7 +21,7 @@ pair_style    chgnet ../../potentials/CHGNET
 
 read_data     ./dat.lammps
 
-pair_coeff    * *  MPtrj-efsm  Zr O
+pair_coeff    * *  0.3.0  Zr O
 #pair_coeff    * *  path ./users_model.pt  Zr O
 
 dump          myDump all custom 10 xyz.lammpstrj id element x y z
