@@ -232,6 +232,7 @@ void PairM3GNet::coeff(int narg, char **arg)
     int ntypesEff;
 
     int dftd3 = withDFTD3();
+    int gpu   = withGPU();
 
     if (narg != (3 + ntypes))
     {
@@ -279,7 +280,7 @@ void PairM3GNet::coeff(int narg, char **arg)
         this->finalizePython();
     }
 
-    this->cutoff = this->initializePython(arg[2], dftd3);
+    this->cutoff = this->initializePython(arg[2], dftd3, gpu);
 
     if (this->cutoff <= 0.0)
     {
@@ -350,6 +351,11 @@ int PairM3GNet::withDFTD3()
     return 0;
 }
 
+int PairM3GNet::withGPU()
+{
+    return 0;
+}
+
 void PairM3GNet::finalizePython()
 {
     if (this->initializedPython == 0)
@@ -365,7 +371,7 @@ void PairM3GNet::finalizePython()
     Py_Finalize();
 }
 
-double PairM3GNet::initializePython(const char *name, int dftd3)
+double PairM3GNet::initializePython(const char *name, int dftd3, int gpu)
 {
     if (this->initializedPython != 0)
     {
@@ -382,6 +388,7 @@ double PairM3GNet::initializePython(const char *name, int dftd3)
     PyObject* pyArgs   = nullptr;
     PyObject* pyArg1   = nullptr;
     PyObject* pyArg2   = nullptr;
+    PyObject* pyArg3   = nullptr;
     PyObject* pyValue  = nullptr;
 
     Py_Initialize();
@@ -432,10 +439,12 @@ double PairM3GNet::initializePython(const char *name, int dftd3)
         {
             pyArg1 = PyUnicode_FromString(name);
             pyArg2 = PyBool_FromLong(dftd3);
+            pyArg3 = PyBool_FromLong(gpu);
 
-            pyArgs = PyTuple_New(2);
+            pyArgs = PyTuple_New(3);
             PyTuple_SetItem(pyArgs, 0, pyArg1);
             PyTuple_SetItem(pyArgs, 1, pyArg2);
+            PyTuple_SetItem(pyArgs, 2, pyArg3);
 
             pyValue = PyObject_CallObject(pyFunc, pyArgs);
 

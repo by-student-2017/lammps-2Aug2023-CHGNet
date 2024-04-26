@@ -11,15 +11,22 @@ from ase.calculators.mixing import SumCalculator
 import matgl
 from matgl.ext.ase import M3GNetCalculator
 
-def m3gnet_initialize(model_name = None, dftd3 = False):
+import torch
+
+def m3gnet_initialize(model_name = None, dftd3 = False, gpu = True):
     """
     Initialize GNNP of M3GNet.
     Args:
         model_name (str): name of model for GNNP.
         dftd3 (bool): to add correction of DFT-D3.
+        gpu (bool): using GPU, if possible.
     Returns:
         cutoff: cutoff radius.
     """
+
+    # Check gpu
+    if gpu and torch.cuda.is_available():
+        torch.set_default_device("cuda")
 
     # Create M3GNetCalculator, that is pre-trained
     global myCalculator

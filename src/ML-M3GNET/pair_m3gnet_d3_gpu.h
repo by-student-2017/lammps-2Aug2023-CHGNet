@@ -7,24 +7,24 @@
 
 #ifdef PAIR_CLASS
 
-PairStyle(m3gnet/d3, PairM3GNetD3)
+PairStyle(m3gnet/d3/gpu, PairM3GNetD3GPU)
 
 #else
 
-#ifndef LMP_PAIR_M3GNET_D3_H_
-#define LMP_PAIR_M3GNET_D3_H_
+#ifndef LMP_PAIR_M3GNET_D3_GPU_H_
+#define LMP_PAIR_M3GNET_D3_GPU_H_
 
 #include "pair_m3gnet.h"
 
 namespace LAMMPS_NS
 {
 
-class PairM3GNetD3: public PairM3GNet
+class PairM3GNetD3GPU: public PairM3GNet
 {
 public:
-    PairM3GNetD3(class LAMMPS*);
+    PairM3GNetD3GPU(class LAMMPS*);
 
-    virtual ~PairM3GNetD3() override;
+    virtual ~PairM3GNetD3GPU() override;
 
 protected:
     int withDFTD3() override;
@@ -34,5 +34,5 @@ protected:
 
 }  // namespace LAMMPS_NS
 
-#endif /* LMP_PAIR_M3GNET_D3_H_ */
+#endif /* LMP_PAIR_M3GNET_D3_GPU_H_ */
 #endif

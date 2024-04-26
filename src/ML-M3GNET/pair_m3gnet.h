@@ -50,6 +50,8 @@ public:
 protected:
     virtual int withDFTD3();
 
+    virtual int withGPU();
+
 private:
     int*      atomNumMap;
     int*      atomNums;

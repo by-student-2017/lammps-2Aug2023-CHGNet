@@ -1,15 +1,15 @@
 /*
- * Copyright (C) 2022 AdvanceSoft Corporation
+ * Copyright (C) 2024 AdvanceSoft Corporation
  *
  * This source code is licensed under the GNU General Public License Version 2
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-#include "pair_m3gnet_d3.h"
+#include "pair_m3gnet_gpu.h"
 
 using namespace LAMMPS_NS;
 
-PairM3GNetD3::PairM3GNetD3(LAMMPS *lmp) : PairM3GNet(lmp)
+PairM3GNetGPU::PairM3GNetGPU(LAMMPS *lmp) : PairM3GNet(lmp)
 {
     if (copymode)
     {
@@ -19,18 +19,18 @@ PairM3GNetD3::PairM3GNetD3(LAMMPS *lmp) : PairM3GNet(lmp)
     // NOP
 }
 
-PairM3GNetD3::~PairM3GNetD3()
+PairM3GNetGPU::~PairM3GNetGPU()
 {
     // NOP
 }
 
-int PairM3GNetD3::withDFTD3()
-{
-    return 1;
-}
-
-int PairM3GNetD3::withGPU()
+int PairM3GNetGPU::withDFTD3()
 {
     return 0;
+}
+
+int PairM3GNetGPU::withGPU()
+{
+    return 1;
 }
 
