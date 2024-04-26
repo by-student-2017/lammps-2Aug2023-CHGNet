@@ -27,6 +27,8 @@ def m3gnet_initialize(model_name = None, dftd3 = False, gpu = True):
     # Check gpu
     if gpu and torch.cuda.is_available():
         torch.set_default_device("cuda")
+    else:
+        torch.set_default_device("cpu")
 
     # Create M3GNetCalculator, that is pre-trained
     global myCalculator
