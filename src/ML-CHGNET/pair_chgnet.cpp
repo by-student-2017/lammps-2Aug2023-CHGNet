@@ -161,7 +161,6 @@ void PairCHGNet::performGNN()
     int* ilist = list->ilist;
 
     double volume;
-    double factor;
     double evdwl = 0.0;
 
     // perform Graph Neural Network Potential of CHGNet
