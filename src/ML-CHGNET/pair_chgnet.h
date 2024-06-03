@@ -5,6 +5,10 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
+/*
+ * The rewrite about Magmom was done by "By Student".
+ */
+
 #ifdef PAIR_CLASS
 
 PairStyle(chgnet, PairCHGNet)
@@ -60,6 +64,7 @@ private:
     double**  positions;
     double**  forces;
     double*   stress;
+	double*   magmoms;
 
     int       maxinum;
     int       initializedPython;
