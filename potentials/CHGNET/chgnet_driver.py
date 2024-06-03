@@ -5,10 +5,16 @@ This source code is licensed under the GNU General Public License Version 2
 found in the LICENSE file in the root directory of this source tree.
 """
 
+"""
+The rewrite about Magmom was done by "By Student".
+"""
+
 from ase import Atoms
 from ase.calculators.mixing import SumCalculator
+from ase.io.trajectory import Trajectory
 
 from chgnet.model import CHGNet, CHGNetCalculator
+#from chgnet.utils import solve_charge_by_mag
 
 import torch
 
@@ -75,7 +81,7 @@ def chgnet_initialize(model_name = None, as_path = False, dftd3 = False, gpu = T
     rbond = float(myCHGNet.graph_converter.bond_graph_cutoff)
     return max(ratom, rbond)
 
-def chgnet_get_energy_forces_stress(cell, atomic_numbers, positions):
+def chgnet_get_energy_forces_stress_magmoms(cell, atomic_numbers, positions, magmoms):
     """
     Predict total energy, atomic forces and stress w/ pre-trained GNNP of CHGNet.
     Args:
@@ -86,6 +92,7 @@ def chgnet_get_energy_forces_stress(cell, atomic_numbers, positions):
         energy:  total energy.
         forcces: atomic forces.
         stress:  stress tensor (Voigt order).
+        magmoms: magnetic moments.
     """
 
     # Initialize Atoms
@@ -110,9 +117,10 @@ def chgnet_get_energy_forces_stress(cell, atomic_numbers, positions):
         myAtoms.set_atomic_numbers(atomic_numbers)
         myAtoms.set_positions(positions)
 
-    # Predicting energy, forces and stress
+    # Predicting energy, forces, stress and magmoms
     energy = myAtoms.get_potential_energy().item()
     forces = myAtoms.get_forces().tolist()
+    magmoms = myAtoms.get_magnetic_moments().tolist()
 
     global chgnetCalculator
     global dftd3Calculator
@@ -132,5 +140,5 @@ def chgnet_get_energy_forces_stress(cell, atomic_numbers, positions):
 
         myAtoms.calc = myCalculator
 
-    return energy, forces, stress
+    return energy, forces, stress, magmoms
 
