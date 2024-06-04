@@ -391,10 +391,10 @@ void PairCHGNet::init_style()
 
     int* periodicity = domain->periodicity;
 
-    if (!(periodicity[0] && periodicity[1] && periodicity[2]))
-    {
-        error->all(FLERR, "Pair style CHGNet requires periodic boundary condition");
-    }
+    //if (!(periodicity[0] && periodicity[1] && periodicity[2]))
+    //{
+    //    error->all(FLERR, "Pair style CHGNet requires periodic boundary condition");
+    //}
 
     neighbor->add_request(this, NeighConst::REQ_FULL);
 }
