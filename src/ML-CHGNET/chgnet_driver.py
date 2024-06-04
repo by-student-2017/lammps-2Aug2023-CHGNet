@@ -14,6 +14,8 @@ from ase.calculators.mixing import SumCalculator
 from ase.io.trajectory import Trajectory
 
 from chgnet.model import CHGNet, CHGNetCalculator
+
+#from pymatgen.io.ase import AseAtomsAdaptor
 #from chgnet.utils import solve_charge_by_mag
 
 import torch
@@ -121,6 +123,9 @@ def chgnet_get_energy_forces_stress_magmoms(cell, atomic_numbers, positions, mag
     energy = myAtoms.get_potential_energy().item()
     forces = myAtoms.get_forces().tolist()
     magmoms = myAtoms.get_magnetic_moments().tolist()
+    #structure = AseAtomsAdaptor.get_structure(myAtoms)
+    #struct_with_chg = solve_charge_by_mag(structure)
+    #print(struct_with_chg)
 
     global chgnetCalculator
     global dftd3Calculator
