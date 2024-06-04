@@ -580,6 +580,7 @@ double PairCHGNet::calculatePython()
     int hasForces = 0;
     int hasStress = 0;
     int hasMagmoms= 0;
+    double total_charge = 0.0;
 
     PyObject* pyFunc  = this->pyFunc;
     PyObject* pyArgs  = nullptr; // call function
@@ -773,13 +774,20 @@ double PairCHGNet::calculatePython()
                             this->charges[iatom] = 2.0 - (this->magmoms[iatom]+1) + 1.8;
                         }
                     }
-                    // 
+                    //
+                    total_charge += this->charges[iatom];
                 }
                 else
                 {
                     if (PyErr_Occurred()) PyErr_Print();
                     hasMagmoms = 0;
                     break;
+                }
+            }
+            if (abs(total_charge) >= 1.0e-3){
+                //printf("Note: correct the total charge (%f) to 0.0 \n", total_charge);
+                for (iatom = 0; iatom < natom; ++iatom){
+                    this->charges[iatom] -= (total_charge/natom);
                 }
             }
         }
