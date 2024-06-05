@@ -593,6 +593,7 @@ double PairCHGNet::calculatePython()
     int hasStress = 0;
     int hasMagmoms= 0;
     double total_charge = 0.0;
+    double q_tmp = 0.0;
 
     PyObject* pyFunc  = this->pyFunc;
     PyObject* pyArgs  = nullptr; // call function
@@ -756,6 +757,7 @@ double PairCHGNet::calculatePython()
                 if (pyVobj != nullptr && PyFloat_Check(pyVobj))
                 {
                     this->magmoms[iatom] = PyFloat_AsDouble(pyVobj);
+                    q_tmp = this->charges[iatom];
                     // An approximate formula for calculating charge from atomic number and MAGMOM can be inserted here.
                     // Currently a bad alternative.
                     if (ALL_ELEMENTS_ION[this->atomNums[iatom]] > 0){
@@ -785,6 +787,9 @@ double PairCHGNet::calculatePython()
                         if (this->magmoms[iatom]+1 > 2.0){
                             this->charges[iatom] = 2.0 - (this->magmoms[iatom]+1) + 1.8;
                         }
+                    }
+                    if ( abs(this->charges[iatom] - q_tmp) >= q_tmp*0.3){
+                        this->charges[iatom] = q_tmp;
                     }
                     //
                     total_charge += this->charges[iatom];
