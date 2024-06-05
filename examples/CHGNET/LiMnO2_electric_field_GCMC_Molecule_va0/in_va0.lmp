@@ -6,7 +6,8 @@ read_data       data_va0.lammps
 
 replicate 6 4 1
 
-region inside block $(xlo+1) $(xhi-1) $(ylo+1) $(yhi-1) 6.833 $(zhi-1)
+variable substrate_top equal 5.833
+region inside block $(xlo+0.5) $(xhi-0.5) $(ylo+0.5) $(yhi-0.5) $(v_substrate_top+0.5) $(zhi-0.5)
 
 molecule        my_one_water H2O.txt
 group           water type 4:5
