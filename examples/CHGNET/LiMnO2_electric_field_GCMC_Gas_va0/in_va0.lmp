@@ -10,6 +10,7 @@ group           gas type 4
 
 variable Tini equal 300.0 # [K]
 variable Tfin equal 600.0 # [K]
+variable Nout equal 1000
 
 #pair_style    chgnet /mnt/d/lammps/src/ML-CHGNET
 #pair_style    chgnet/d3 /mnt/d/lammps/src/ML-CHGNET
@@ -23,7 +24,7 @@ pair_coeff    * *  0.3.0 ${elem}
 
 timestep 0.0001 # 0.1 [fs] (Recommend 0.1-0.5 [fs])
 
-thermo 1000
+thermo ${Nout}
 thermo_style custom step time cpu cpuremain lx ly lz press pe temp
 
 velocity all create ${Tini} 12345 mom yes rot no
@@ -44,8 +45,8 @@ variable va equal 2.0/lz
 fix kick all efield 0.0 0.0 v_va
 fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
 
-dump            d1 all cfg 100 cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
 dump_modify     d1 element ${elem}
-dump_modify     d1 sort id
+#dump_modify     d1 sort id
 
 run             1000000
