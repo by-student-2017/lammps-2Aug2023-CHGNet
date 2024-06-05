@@ -16,6 +16,10 @@ variable Tini equal 300.0 # [K]
 variable Tfin equal 358.0 # [K]
 variable Nout equal 100
 
+set type 1 charge +1
+set type 2 charge +3
+set type 3 charge -2
+
 #pair_style    chgnet /mnt/d/lammps/src/ML-CHGNET
 #pair_style    chgnet/d3 /mnt/d/lammps/src/ML-CHGNET
 pair_style    chgnet/gpu /mnt/d/lammps/src/ML-CHGNET
