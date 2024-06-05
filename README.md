@@ -5,3 +5,6 @@ This is a prototype that can output MAGMOM (magnetic moment) as q (=charge) on L
 A "va0" version gives a charge from Magmom. Currently, the provisional formula is given, but after calculating the same structure in the same structure for the calculation system, the charge is calculated so that the same value is calculated from the MAGMOM value. " pair_chgnet.cpp "should be added. 
 
 The "va0" version has been turned off by warning by setting "Boundary". If you want to set "Boundary" to "f", please prepare a vacuum layer or solvent with 10 Angstrom or higher for the axis to "f". In practical use, it is rare to calculate with 10 Angstrom or less in Lammps, so there is no problem.
+
+"Magnetic interactions in molecules and an analysis of molecular electronic charge distribution from magnetic parameters"(https://pubs.acs.org/doi/pdf/10.1021/cr60292a003)
+
