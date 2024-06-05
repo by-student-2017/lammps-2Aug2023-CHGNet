@@ -10,8 +10,8 @@ molecule        my_one_water H2O.txt
 group           water type 4:5
 
 variable Tini equal 300.0 # [K]
-variable Tfin equal 358.0 # [K]
-variable Nout equal 1000
+variable Tfin equal 350.0 # [K]
+variable Nout equal 100
 
 #pair_style    chgnet /mnt/d/lammps/src/ML-CHGNET
 #pair_style    chgnet/d3 /mnt/d/lammps/src/ML-CHGNET
@@ -42,7 +42,7 @@ fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 fix f3 water gcmc 100 1 1 0 123456 ${Tfin} -0.0002 0.01 mol my_one_water full_energy
 
 # E-field component values (electric field units) (electric field = volts/Angstrom)
-variable va equal 2.0/lz
+variable va equal 1.5/lz
 fix kick all efield 0.0 0.0 v_va
 fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
 
