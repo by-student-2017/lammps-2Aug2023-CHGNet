@@ -16,6 +16,7 @@ variable Tini equal 300.0 # [K]
 variable Tfin equal 358.0 # [K]
 variable Nout equal 100
 
+# If "CHGNet" is not +/- 30 % of this configuration (may be set in Read_data or MoleCule File), this set value is forcibly used.
 set type 1 charge +1
 set type 2 charge +3
 set type 3 charge -2
