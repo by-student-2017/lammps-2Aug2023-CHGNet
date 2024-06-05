@@ -32,15 +32,17 @@ thermo_style custom step time cpu cpuremain lx ly lz press pe temp
 
 velocity all create ${Tini} 12345 mom yes rot no
 
+compute mdtemp all temp
+compute_modify mdtemp dynamic/dof yes
+
 # Equilibrium system, calculation settings
-#compute mdtemp mdatoms temp
-#compute_modify mdtemp dynamic/dof yes
 #fix mdnvt mdatoms nvt temp ${Tini} ${Tfin} $(100*dt)
 #fix_modify mdnvt temp mdtemp
 
 # non-equilibrium system, calculation settings
 fix f1 all nve
 fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
+fix_modify f2 temp mdtemp
 
 # GCMC
 fix f3 water gcmc 100 1 1 0 123456 ${Tfin} -0.0002 0.01 mol my_one_water full_energy region inside
