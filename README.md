@@ -17,3 +17,5 @@ I've managed to assign the magnetic moment value from CHGNet to the q part where
 Or you could use "chgnet_driver.py" and put the charges into magmoms, if there is code in python or other languages ​​that predicts the charges from the structure, magnetic moments, etc.
 
 One thing that is bothering me is that the force and virial are set to "+=", so I think I'll have to check that later. It would be fine if they were processed with "+=" after they reach 0 each time. I'll make time to check that later too. I am very worried because PLUMUD uses "=".
+
+In the "va0" version, "+=" is changed to "=".
