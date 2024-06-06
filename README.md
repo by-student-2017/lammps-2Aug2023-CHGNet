@@ -9,3 +9,5 @@ The "va0" version has been turned off by warning by setting "Boundary". If you w
 "Magnetic interactions in molecules and an analysis of molecular electronic charge distribution from magnetic parameters"(https://pubs.acs.org/doi/pdf/10.1021/cr60292a003)
 
 "Geometric, electronic, and magnetic structure of Co2⁢FeSi: Curie temperature and magnetic moment measurements and calculations"(https://doi.org/10.1103/PhysRevB.72.184434)
+
+I've managed to assign the magnetic moment value from CHGNet to the q part where the charge value is stored in Lammps, so I've shown this below. From here, rewrite line 123 of chgnet_driver.py so that the charge is calculated from the magnetic moment value, or rewrite the "this->magmoms[iatom]" part on lines 235 or 729 of pair_chgnet.cpp. Simply write into the code an equation that uses "this->magmoms[iatom]" and atomic information to calculate the charge. (https://github.com/by-student-2017/lammps-2Aug2023-CHGNet) Or you could use "chgnet_driver.py" and put the charges into magmoms, if there is code in python or other languages ​​that predicts the charges from the structure, magnetic moments, etc.
