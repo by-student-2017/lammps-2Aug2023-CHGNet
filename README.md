@@ -26,6 +26,8 @@ https://matsci.org/t/finding-appropriate-zeta-and-qcore-parameters-for-fix-qeq-s
 
 https://matsci.org/t/param-qeq-file/46208/2
 
+https://towhee.sourceforge.net/forcefields/uff.html
+
 #--------------------------------------------------------------------------------------
 
 https://github.com/numat/EQeq
