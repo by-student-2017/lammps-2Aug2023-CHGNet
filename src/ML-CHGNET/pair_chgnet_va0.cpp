@@ -205,7 +205,7 @@ void PairCHGNet::performGNN()
     // set total energy
     if (eflag_global)
     {
-        eng_vdwl += evdwl;
+        eng_vdwl = evdwl;
     }
 
     // set atomic forces
@@ -213,9 +213,9 @@ void PairCHGNet::performGNN()
     {
         i = ilist[iatom];
 
-        f[i][0] += this->forces[iatom][0];
-        f[i][1] += this->forces[iatom][1];
-        f[i][2] += this->forces[iatom][2];
+        f[i][0] = this->forces[iatom][0];
+        f[i][1] = this->forces[iatom][1];
+        f[i][2] = this->forces[iatom][2];
     }
 
     // set virial pressure
@@ -223,12 +223,12 @@ void PairCHGNet::performGNN()
     {
         volume = domain->xprd * domain->yprd * domain->zprd;
 
-        virial[0] -= volume * this->stress[0]; // xx
-        virial[1] -= volume * this->stress[1]; // yy
-        virial[2] -= volume * this->stress[2]; // zz
-        virial[3] -= volume * this->stress[3]; // yz
-        virial[4] -= volume * this->stress[4]; // xz
-        virial[5] -= volume * this->stress[5]; // xy
+        virial[0] = volume * this->stress[0]; // xx
+        virial[1] = volume * this->stress[1]; // yy
+        virial[2] = volume * this->stress[2]; // zz
+        virial[3] = volume * this->stress[3]; // yz
+        virial[4] = volume * this->stress[4]; // xz
+        virial[5] = volume * this->stress[5]; // xy
     }
 
     // set atomic charges
