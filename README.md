@@ -24,4 +24,6 @@ https://www.biotite-python.org/apidoc/biotite.structure.partial_charges.html
 
 https://www.rdkit.org/docs/GettingStartedInPython.html
 
+https://github.com/sb-ncbr/AtomicChargeCalculator2
 
+https://github.com/MergunFrimen/molstar-partial-charges
