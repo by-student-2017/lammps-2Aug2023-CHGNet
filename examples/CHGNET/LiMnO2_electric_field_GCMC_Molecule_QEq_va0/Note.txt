@@ -5,3 +5,23 @@ Then, change data file (data_va0.lammps) format to "full" on Ovito.
 And, rewrite "atom types" and "Masses" including data of molecule file (H2O.txt)
 
 Set qfile from qfile_lammps.txt
+#--------------------------------------------------------------------------------------
+fix qeq/point command
+#--------------------------------------------------------------------------------------
+https://matsci.org/t/question-about-parameter-in-qfile-for-fix-qeq-point-command/22735
+https://github.com/openbabel/openbabel/blob/master/data/qeq.txt
+https://github.com/baoilleach/openbabel-svn-mirror/blob/master/data/qeq.txt
+https://matsci.org/t/finding-appropriate-zeta-and-qcore-parameters-for-fix-qeq-slater/27140
+https://matsci.org/t/param-qeq-file/46208/2
+https://towhee.sourceforge.net/forcefields/uff.html
+#--------------------------------------------------------------------------------------
+https://github.com/numat/EQeq
+https://pypi.org/project/pyeqeq/
+https://gitlab.com/jmargraf/qpac
+[Schrödinger Python API 2018](https://content.schrodinger.com/Docs/r2018-2/python_api/api/schrodinger.structure.html)
+https://docs.eyesopen.com/toolkits/python/quacpactk/index.html
+https://www.biotite-python.org/apidoc/biotite.structure.partial_charges.html
+https://www.rdkit.org/docs/GettingStartedInPython.html
+https://github.com/sb-ncbr/AtomicChargeCalculator2
+https://github.com/MergunFrimen/molstar-partial-charges
+#--------------------------------------------------------------------------------------
