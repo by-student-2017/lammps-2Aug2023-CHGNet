@@ -16,13 +16,14 @@ I've managed to assign the magnetic moment value from CHGNet to the q part where
 
 Or you could use "chgnet_driver.py" and put the charges into magmoms, if there is code in python or other languages ​​that predicts the charges from the structure, magnetic moments, etc.
 
+https://github.com/numat/EQeq
+https://pypi.org/project/pyeqeq/
+
 https://gitlab.com/jmargraf/qpac
 
 [Schrödinger Python API 2018](https://content.schrodinger.com/Docs/r2018-2/python_api/api/schrodinger.structure.html)
 
 https://docs.eyesopen.com/toolkits/python/quacpactk/index.html
-
-https://pypi.org/project/pyeqeq/
 
 https://www.biotite-python.org/apidoc/biotite.structure.partial_charges.html
 
