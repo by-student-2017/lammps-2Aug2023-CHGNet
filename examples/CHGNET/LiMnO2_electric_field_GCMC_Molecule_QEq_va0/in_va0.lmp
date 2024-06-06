@@ -1,0 +1,71 @@
+units           metal
+atom_style      full
+boundary        p p f
+
+read_data       data_va0.lammps
+
+replicate 6 4 1
+
+variable substrate_top equal 5.833
+region inside block $(xlo+1.0) $(xhi-1.0) $(ylo+1.0) $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
+
+molecule        my_one_water H2O.txt
+group           water type 4:5
+
+variable Tini equal 300.0 # [K]
+variable Tfin equal 358.0 # [K]
+variable Nout equal 1000
+
+# If "CHGNet" is not +/- 30 % of this configuration (may be set in Read_data or MoleCule File), this set value is forcibly used.
+set type 1 charge +1
+set type 2 charge +3
+set type 3 charge -2
+
+#pair_style    chgnet /mnt/d/lammps/src/ML-CHGNET
+#pair_style    chgnet/d3 /mnt/d/lammps/src/ML-CHGNET
+pair_style    chgnet/gpu /mnt/d/lammps/src/ML-CHGNET
+#pair_style    chgnet/d3/gpu /mnt/d/lammps/src/ML-CHGNET
+
+variable elem string "Li Mn O H O"
+
+pair_coeff    * *  0.3.0 ${elem}
+#pair_coeff    * *  path ./users_model.pt ${elem}
+
+fix fq all qeq/slater 5 10 1.0e-6 100 qfile # alpha 0.2
+#fix fq all qeq/point 1 10 1.0e-6 200 qfile
+#fix fq all qeq/dynamic 1 12 1.0e-3 100 qfile
+#fix fq all qeq/shielded 1 8 1.0e-6 100 qfile # failed
+#fix fq all qeq/fire 1 10 1.0e-3 100 qfile qdamp 0.2 qstep 0.1 # failed
+
+timestep 0.0001 # 0.1 [fs] (Recommend 0.1-0.5 [fs])
+
+thermo ${Nout}
+thermo_style custom step time cpu cpuremain lx ly lz press pe temp
+
+velocity all create ${Tini} 12345 mom yes rot no
+
+compute mdtemp all temp
+compute_modify mdtemp dynamic/dof yes
+
+# Equilibrium system, calculation settings
+#fix mdnvt mdatoms nvt temp ${Tini} ${Tfin} $(100*dt)
+#fix_modify mdnvt temp mdtemp
+
+# non-equilibrium system, calculation settings
+fix f1 all nve
+fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
+fix_modify f2 temp mdtemp
+
+# GCMC
+fix f3 water gcmc 100 1 1 0 123456 ${Tfin} -0.0002 0.01 mol my_one_water full_energy region inside
+
+# E-field component values (electric field units) (electric field = volts/Angstrom)
+variable va equal 1.5/lz
+fix kick all efield 0.0 0.0 v_va
+fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
+
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
+dump_modify     d1 element ${elem}
+#dump_modify     d1 sort id
+
+run             1000000

@@ -1,0 +1,17 @@
+#
+# Lammps qfile data base
+#
+# Parameters:
+#
+#   Elt: Element symbol
+#   chi = Eneg: Atomic electronegativity (Volts) * 2 (Note: Actually, chi = electronegativity in energy units = Eneg)
+#   eta = Hard: Atomic (chemical) hardness (Volts/e) (Note: Actually, eta = self-Coulomb potential in energy units = Hard/2)
+#   gamma = Radius: screening radius (Angstrom), gamma = shielded Coulomb constant defined by ReaxFF force field in distance units
+#   zeta = Slater type orbital exponent defined by the Streitz-Mintmire potential in reverse distance units
+#   qcore = charge of the nucleus defined by the Streitz-Mintmire potential potential in charge units
+# Elt  chi      eta   gamma  zeta  qcore
+1	6.012	4.772	2.4076	0.41745	2	# Li
+2	6.65	8.21	1.3994	0.76316	4	# Mn
+3	17.482	13.364	0.8597	0.97154	2	# O
+4	9.056	13.8904	0.8271	1.05115	1	# H
+5	17.482	13.364	0.8597	0.97154	2	# O
