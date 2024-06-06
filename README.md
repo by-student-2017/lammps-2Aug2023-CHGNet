@@ -16,37 +16,4 @@ I've managed to assign the magnetic moment value from CHGNet to the q part where
 
 Or you could use "chgnet_driver.py" and put the charges into magmoms, if there is code in python or other languages ​​that predicts the charges from the structure, magnetic moments, etc.
 
-fix qeq/point command
-
-https://matsci.org/t/question-about-parameter-in-qfile-for-fix-qeq-point-command/22735
-
-https://github.com/openbabel/openbabel/blob/master/data/qeq.txt
-
-https://github.com/baoilleach/openbabel-svn-mirror/blob/master/data/qeq.txt
-
-https://matsci.org/t/finding-appropriate-zeta-and-qcore-parameters-for-fix-qeq-slater/27140
-
-https://matsci.org/t/param-qeq-file/46208/2
-
-https://towhee.sourceforge.net/forcefields/uff.html
-
-#--------------------------------------------------------------------------------------
-
-https://github.com/numat/EQeq
-https://pypi.org/project/pyeqeq/
-
-https://gitlab.com/jmargraf/qpac
-
-[Schrödinger Python API 2018](https://content.schrodinger.com/Docs/r2018-2/python_api/api/schrodinger.structure.html)
-
-https://docs.eyesopen.com/toolkits/python/quacpactk/index.html
-
-https://www.biotite-python.org/apidoc/biotite.structure.partial_charges.html
-
-https://www.rdkit.org/docs/GettingStartedInPython.html
-
-https://github.com/sb-ncbr/AtomicChargeCalculator2
-
-https://github.com/MergunFrimen/molstar-partial-charges
-
 One thing that is bothering me is that the force and virial are set to "+=", so I think I'll have to check that later. It would be fine if they were processed with "+=" after they reach 0 each time. I'll make time to check that later too. I am very worried because PLUMUD uses "=".
