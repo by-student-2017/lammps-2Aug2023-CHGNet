@@ -16,6 +16,10 @@ I've managed to assign the magnetic moment value from CHGNet to the q part where
 
 Or you could use "chgnet_driver.py" and put the charges into magmoms, if there is code in python or other languages ​​that predicts the charges from the structure, magnetic moments, etc.
 
+fix qeq/point command
+https://matsci.org/t/question-about-parameter-in-qfile-for-fix-qeq-point-command/22735
+https://github.com/openbabel/openbabel/blob/master/data/qeq.txt
+
 https://github.com/numat/EQeq
 https://pypi.org/project/pyeqeq/
 
