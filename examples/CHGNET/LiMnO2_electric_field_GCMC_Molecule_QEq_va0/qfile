@@ -11,7 +11,6 @@
 #   zeta = Slater type orbital exponent defined by the Streitz-Mintmire potential in reverse distance units
 #     Parameters: (Slater exponent in 1/Bohr as 0.4913(2n+1)/2R)
 #   qcore = charge of the nucleus defined by the Streitz-Mintmire potential potential in charge units
-# Elt	chi(Xi*2)	eta(Hardness)	gamma(Radius)	zeta(SlaterExp)	qcore(n)	GaussianExp
 # Elt  chi      eta   gamma  zeta  qcore
 1	6.012	4.772	2.4076	0.41745	2	# Li
 2	6.65	8.21	1.3994	0.76316	4	# Mn
