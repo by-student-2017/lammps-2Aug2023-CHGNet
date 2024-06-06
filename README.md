@@ -30,4 +30,4 @@ https://github.com/sb-ncbr/AtomicChargeCalculator2
 
 https://github.com/MergunFrimen/molstar-partial-charges
 
-One thing that is bothering me is that the force and virial are set to "+=", so I think I'll have to check that later. It would be fine if they were processed with "+=" after they reach 0 each time. I'll make time to check that later too.
+One thing that is bothering me is that the force and virial are set to "+=", so I think I'll have to check that later. It would be fine if they were processed with "+=" after they reach 0 each time. I'll make time to check that later too. I am very worried because PLUMUD uses "=".
