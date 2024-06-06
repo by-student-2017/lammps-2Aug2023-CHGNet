@@ -24,6 +24,8 @@ https://github.com/openbabel/openbabel/blob/master/data/qeq.txt
 
 https://matsci.org/t/finding-appropriate-zeta-and-qcore-parameters-for-fix-qeq-slater/27140
 
+https://matsci.org/t/param-qeq-file/46208/2
+
 #--------------------------------------------------------------------------------------
 
 https://github.com/numat/EQeq
