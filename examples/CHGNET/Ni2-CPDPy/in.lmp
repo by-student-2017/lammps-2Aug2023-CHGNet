@@ -9,7 +9,7 @@ boundary        p p p   # periodic boundary condition
 variable Tini equal 300.0 # [K] (Initial temperature)
 variable Tfin equal 593.0 # [K] (Annealing temperature), other condition: 873 K, 973 K
 
-variable Nout equal 400 # every 400 time steps to the specified file
+variable Nout equal 100 # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 read_data       data.lammps
@@ -28,7 +28,7 @@ pair_coeff    * *  0.3.0 ${elem}
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
-minimize 1.0e-4 1.0e-6 1000 10000
+#minimize 1.0e-4 1.0e-6 1000 10000
 
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
