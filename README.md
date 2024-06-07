@@ -10,6 +10,8 @@ Since the calculation of "d3" is very heavy, there is also a method to use momb 
 
 momb (=DFT-D2): make yes-EXTRA-PAIR
 
+we found that the accuracy of the DFT-D2 method of Grimme is comparable to that of the DFT+vdWsurf method. [Ref; https://doi.org/10.1021/jp412098n]
+
 QEq: make yes-QEQ
 
 GCMC: make yes-MC
