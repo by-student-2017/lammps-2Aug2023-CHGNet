@@ -8,7 +8,7 @@ If you want to calculate an interface with an applied electric field, we recomme
 
 Since the calculation of "d3" is very heavy, there is also a method to use momb implemented in Lammps. The parameters are described in the original paper. I prepared a folder named momb as a reference example. When used in conjunction with "QEq", "CHGNet" and "M3GNet" will enable a fairly wide range of calculations.
 
-momb: make yes-EXTRA-PAIR
+momb (= DFT-D2 method): make yes-EXTRA-PAIR
 
 QEq: make yes-QEQ
 
