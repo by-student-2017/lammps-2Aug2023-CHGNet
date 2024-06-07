@@ -1,12 +1,17 @@
+#
+# pair_style momb cutoff s6 d
+#  s6 = global scaling factor of the exchange-correlation functional used (unitless)
+#    s6 = 0.75 (PBE), 1.2 (BLYP), 1.05 (B-P86), 1.0 (TPSS), and 1.05 (B3LYP)
+#  d = damping scaling factor of Grimme’s method (unitless)
+#    d = 20
+#
+# pair_coeff i j momb 0.0 1.0 1.0 C6[i][j] Rr[i][j]
+#  C6[i][j] = sqrt(C6[i]*C6[j]), C6 (energy*distance^6 units on Lammps)
+#    1.0 [J/mol * nm^6] = 1.0364e-5 * 10^6 [eV * A^6] = 10.364 [eV * A^6] (for metal units of Lammps)
+#  Rr[i][j] = R0[i] + R0[j], Rr (distance units, typically sum of atomic vdW radii on Lammps)
+#
 # Table1. C6 Parameters (in J nm^6 mol^−1) and vander Waals Radii R0 (in Angstrom) for Elements H-Xe.
 #  Ref: Grimme, J Comput Chem, 27(15), 1787-1799 (2006).: https://doi.org/10.1002/jcc.20495
-#  Note: C6 = 1.0 [J/mol * nm^6] = 1.0364e-5 * 10^6 [eV * A^6] = 10.364 [eV * A^6] (for metal units of Lammps)
-#  C6[i][j] = sqrt(C6[i]*C6[j]), C6 (energy*distance^6 units on Lammps)
-#  Rr[i][j] = R0[i] + R0[j], Rr (distance units, typically sum of atomic vdW radii on Lammps)
-#  s6 = 0.75 (PBE), 1.2 (BLYP), 1.05 (B-P86), 1.0 (TPSS), and 1.05 (B3LYP): s6 = global scaling factor of the exchange-correlation functional used (unitless)
-#  d = 20, d = damping scaling factor of Grimme’s method (unitless)
-# pair_style momb cutoff s6 d
-# pair_coeff i j momb 0.0 1.0 1.0 C6[i][j] Rr[i][j]
 # Elt	C6	R0
 H	0.14	1.001
 He	0.08	1.012
