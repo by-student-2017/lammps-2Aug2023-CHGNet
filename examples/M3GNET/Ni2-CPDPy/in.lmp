@@ -41,7 +41,7 @@ velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group 
 #-------------------- Equilibrium calculation --------------------------------------------
 
 #---------- output file settings --------------------------------------
-dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
 dump_modify     d1 element ${elem}
 #----------------------------------------------------------------------
 
