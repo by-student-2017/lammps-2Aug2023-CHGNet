@@ -1,9 +1,9 @@
-# pair_coeff 1 2 momb 0.0 1.0 1.0 C6 Rr
-# C6[i][j] = sqrt(C6[i]*C6[j])
 # Ref: Grimme, J Comput Chem, 27(15), 1787-1799 (2006).: https://doi.org/10.1002/jcc.20495
 # Table1. C6 Parameters (in J nm^6 mol^−1) and vander Waals Radii R0 (in Angstrom) for Elements H-Xe.
-#  Note: 1.0 [J/mol * nm^6] = 1.0364e-5 * 10^6 [eV * A^6] = 10.364 [eV * A^6] (for metal units of lammps)
-#  Rr = R0_A + R0_B
+#  Note: C6 = 1.0 [J/mol * nm^6] = 1.0364e-5 * 10^6 [eV * A^6] = 10.364 [eV * A^6] (for metal units of Lammps)
+#  C6[i][j] = sqrt(C6[i]*C6[j]), C6 (energy*distance^6 units on Lammps)
+#  Rr[i][j] = R0[i] + R0[j], Rr (distance units, typically sum of atomic vdW radii on Lammps)
+# pair_coeff i j momb 0.0 1.0 1.0 C6[i][j] Rr[i][j]
 # Elt	C6	R0
 H	0.14	1.001
 He	0.08	1.012
