@@ -5,10 +5,6 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-/*
- * The rewrite about Magmom was done by "By Student".
- */
-
 #include "pair_chgnet.h"
 
 using namespace LAMMPS_NS;
@@ -59,7 +55,6 @@ PairCHGNet::~PairCHGNet()
         memory->destroy(this->positions);
         memory->destroy(this->forces);
         memory->destroy(this->stress);
-        memory->destroy(this->magmoms);
     }
 
     if (this->pythonPaths != nullptr)
@@ -99,7 +94,6 @@ void PairCHGNet::allocate()
     memory->create(this->positions, this->maxinum, 3, "pair:positions");
     memory->create(this->forces,    this->maxinum, 3, "pair:forces");
     memory->create(this->stress,    6,                "pair:stress");
-	memory->create(this->magmoms,   this->maxinum,    "pair:magmoms");
 }
 
 void PairCHGNet::compute(int eflag, int vflag)
@@ -134,8 +128,6 @@ void PairCHGNet::prepareGNN()
 
     double* boxlo = domain->boxlo;
 
-    double *q = atom->q; // charge
-
     // grow with inum and nneigh
     if (inum > this->maxinum)
     {
@@ -144,7 +136,6 @@ void PairCHGNet::prepareGNN()
         memory->grow(this->atomNums,  this->maxinum,    "pair:atomNums");
         memory->grow(this->positions, this->maxinum, 3, "pair:positions");
         memory->grow(this->forces,    this->maxinum, 3, "pair:forces");
-        memory->grow(this->magmoms,   this->maxinum,    "pair:magmoms");
     }
 
     // set cell
@@ -170,14 +161,6 @@ void PairCHGNet::prepareGNN()
         this->positions[iatom][1] = x[i][1] - boxlo[1];
         this->positions[iatom][2] = x[i][2] - boxlo[2];
     }
-
-    // set atomic charges
-    for (iatom = 0; iatom < inum; ++iatom)
-    {
-        i = ilist[iatom];
-
-        this->magmoms[iatom] = q[i];
-    }
 }
 
 void PairCHGNet::performGNN()
@@ -192,8 +175,6 @@ void PairCHGNet::performGNN()
 
     double volume;
     double evdwl = 0.0;
-
-    double *q = atom->q; // charge
 
     // perform Graph Neural Network Potential of CHGNet
     evdwl = this->calculatePython();
@@ -225,14 +206,6 @@ void PairCHGNet::performGNN()
         virial[3] -= volume * this->stress[3]; // yz
         virial[4] -= volume * this->stress[4]; // xz
         virial[5] -= volume * this->stress[5]; // xy
-    }
-
-    // set atomic charges
-    for (iatom = 0; iatom < inum; ++iatom)
-    {
-        i = ilist[iatom];
-
-        q[i] = this->magmoms[iatom];
     }
 }
 
@@ -515,8 +488,7 @@ double PairCHGNet::initializePython(const char *name, int as_path, int dftd3, in
 
         Py_XDECREF(pyFunc);
 
-        //pyFunc = PyObject_GetAttrString(pyModule, "chgnet_get_energy_forces_stress");
-        pyFunc = PyObject_GetAttrString(pyModule, "chgnet_get_energy_forces_stress_magmoms");
+        pyFunc = PyObject_GetAttrString(pyModule, "chgnet_get_energy_forces_stress");
 
         if (pyFunc != nullptr && PyCallable_Check(pyFunc))
         {
@@ -563,24 +535,21 @@ double PairCHGNet::calculatePython()
     int hasEnergy = 0;
     int hasForces = 0;
     int hasStress = 0;
-	int hasMagmoms= 0;
 
     PyObject* pyFunc  = this->pyFunc;
-    PyObject* pyArgs  = nullptr; // call function
-    PyObject* pyArg1  = nullptr; // set cell -> pyArg1
-    PyObject* pyArg2  = nullptr; // set atomNums -> pyArg2
-    PyObject* pyArg3  = nullptr; // set positions -> pyArg3
-    PyObject* pyArg4  = nullptr; // set charge(=magmoms) -> pyArg4
-    PyObject* pyAsub  = nullptr; // 3 component for lattice and position
+    PyObject* pyArgs  = nullptr;
+    PyObject* pyArg1  = nullptr;
+    PyObject* pyArg2  = nullptr;
+    PyObject* pyArg3  = nullptr;
+    PyObject* pyAsub  = nullptr;
     PyObject* pyValue = nullptr;
-    PyObject* pyVal1  = nullptr; // get energy <- pyValue
-    PyObject* pyVal2  = nullptr; // get forces <- pyValue
-    PyObject* pyVal3  = nullptr; // get stress <- pyValue
-    PyObject* pyVal4  = nullptr; // get magmoms <- pyValue
-    PyObject* pyVsub  = nullptr; // force 3x3
-    PyObject* pyVobj  = nullptr; // values from GNN
+    PyObject* pyVal1  = nullptr;
+    PyObject* pyVal2  = nullptr;
+    PyObject* pyVal3  = nullptr;
+    PyObject* pyVsub  = nullptr;
+    PyObject* pyVobj  = nullptr;
 
-    // set cell -> pyArg1
+    // set cell -> pyArgs1
     pyArg1 = PyList_New(3);
 
     for (i = 0; i < 3; ++i)
@@ -592,7 +561,7 @@ double PairCHGNet::calculatePython()
         PyList_SetItem(pyArg1, i, pyAsub);
     }
 
-    // set atomNums -> pyArg2
+    // set atomNums -> pyArgs2
     pyArg2 = PyList_New(natom);
 
     for (iatom = 0; iatom < natom; ++iatom)
@@ -600,7 +569,7 @@ double PairCHGNet::calculatePython()
         PyList_SetItem(pyArg2, iatom, PyLong_FromLong(this->atomNums[iatom]));
     }
 
-    // set positions -> pyArg3
+    // set positions -> pyArgs3
     pyArg3 = PyList_New(natom);
 
     for (iatom = 0; iatom < natom; ++iatom)
@@ -612,26 +581,17 @@ double PairCHGNet::calculatePython()
         PyList_SetItem(pyArg3, iatom, pyAsub);
     }
 
-    // set atomNums -> pyArg4
-    pyArg4 = PyList_New(natom);
-    
-    for (iatom = 0; iatom < natom; ++iatom)
-    {
-        PyList_SetItem(pyArg4, iatom, PyLong_FromLong(this->magmoms[iatom]));
-    }
-
     // call function
-    pyArgs = PyTuple_New(4);
+    pyArgs = PyTuple_New(3);
     PyTuple_SetItem(pyArgs, 0, pyArg1);
     PyTuple_SetItem(pyArgs, 1, pyArg2);
     PyTuple_SetItem(pyArgs, 2, pyArg3);
-    PyTuple_SetItem(pyArgs, 3, pyArg4);
 
-    pyValue = PyObject_CallObject(pyFunc, pyArgs); // get values from GNN
+    pyValue = PyObject_CallObject(pyFunc, pyArgs);
 
     Py_DECREF(pyArgs);
 
-    if (pyValue != nullptr && PyTuple_Check(pyValue) && PyTuple_Size(pyValue) >= 4)
+    if (pyValue != nullptr && PyTuple_Check(pyValue) && PyTuple_Size(pyValue) >= 3)
     {
         // get energy <- pyValue
         pyVal1 = PyTuple_GetItem(pyValue, 0);
@@ -714,32 +674,6 @@ double PairCHGNet::calculatePython()
         {
             if (PyErr_Occurred()) PyErr_Print();
         }
-
-        // get magmoms <- pyValue
-        pyVal4 = PyTuple_GetItem(pyValue, 3);
-        if (pyVal4 != nullptr && PyList_Check(pyVal4) && PyList_Size(pyVal4) >= natom)
-        {
-            hasMagmoms = 1;
-
-            for (iatom = 0; iatom < natom; ++iatom)
-            {
-                pyVobj = PyList_GetItem(pyVal4, iatom);
-                if (pyVobj != nullptr && PyFloat_Check(pyVobj))
-                {
-                    this->magmoms[iatom] = PyFloat_AsDouble(pyVobj);
-                }
-                else
-                {
-                    if (PyErr_Occurred()) PyErr_Print();
-                    hasMagmoms = 0;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (PyErr_Occurred()) PyErr_Print();
-        }
     }
 
     else
@@ -749,9 +683,9 @@ double PairCHGNet::calculatePython()
 
     Py_XDECREF(pyValue);
 
-    if (hasEnergy == 0 || hasForces == 0 || hasStress == 0 || hasMagmoms == 0)
+    if (hasEnergy == 0 || hasForces == 0 || hasStress == 0)
     {
-        error->all(FLERR, "Cannot calculate energy, forces, stress and magmoms by python of CHGNet.");
+        error->all(FLERR, "Cannot calculate energy, forces and stress by python of CHGNet.");
     }
 
     return energy;
