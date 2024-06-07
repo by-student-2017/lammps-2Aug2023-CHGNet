@@ -1,47 +1,70 @@
-units           metal
+#-------------------- Initialization -----------------------------------------------------
+clear
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file 
 atom_style      charge
-boundary        p p p
+boundary        p p p   # periodic boundary condition
+#-----------------------------------------------------------------------------------------
+variable Tini equal 300.0 # [K] (Initial temperature)
+variable Tfin equal 593.0 # [K] (Annealing temperature), other condition: 873 K, 973 K
 
+variable Nout equal 400 # every 400 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
 read_data       data_va0.lammps
 
 replicate 1 1 1
 
-variable Tini equal 300.0 # [K]
-variable Tfin equal 593.0 # [K], other condition: 873 K, 973 K
-variable Nout equal 400
+variable elem string "Ni N C H" # specifies the potential file used
 
+#-------------------- Force field --------------------------------------------------------
 pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
 #pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
 
-variable elem string "Ni N C H"
-
 #pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
 pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
-#pair_coeff      * *  M3GNet-MP-2021.2.8-DIRECT-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
 
-timestep 0.00025 # 0.25 [fs] (Recommend 0.1-0.5 [fs])
+#-------------------- Energy Minimization ------------------------------------------------
+# 0 [K], structure optimization
+minimize 1.0e-7 1.0e-8 1000 1000
 
-thermo ${Nout}
-thermo_style custom step time cpu cpuremain lx ly lz press pe temp
+#-------------------- Settings -----------------------------------------------------------
+reset_timestep 0
 
-velocity all create ${Tini} 12345 mom yes rot no
+timestep 0.00025 # 0.25 [fs] (Recommend 0.1-0.5 [fs]), sets the timestep for subsequent simulations
 
-# Equilibrium system, calculation settings
-#fix f1 all nvt temp ${Tini} ${Tfin} $(100*dt)
-fix f1 all npt temp ${Tini} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt)
+thermo ${Nout}   # computes and prints thermodynamic 
+thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
 
+velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
+#-------------------- Equilibrium calculation --------------------------------------------
+
+#---------- output file settings --------------------------------------
 dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
 dump_modify     d1 element ${elem}
+#----------------------------------------------------------------------
+
+#-------------------- Run the simulation -------------------------------------------------
+# Equilibrium system, calculation settings
+#fix f1 all nvt temp ${Tini} ${Tfin} $(100*dt)
+fix f1 all npt temp ${Tini} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp and pressure conserved
 
 run             80000 # 20 [ps]
 
-unfix f1
-undump d1
+unfix  f1 # deletes the previously defined fix 1
+undump d1 # deletes the previously defined dump 1
+#-------------------- Annealing calculation ----------------------------------------------
+reset_timestep 0
 
+#---------- output file settings --------------------------------------
 dump            d2 all cfg ${Nout} cfg/run.*.${Tfin}K.cfg mass type xs ys zs id type vx vy vz fx fy fz q
 dump_modify     d2 element ${elem}
+#----------------------------------------------------------------------
 
-fix f2 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt)
+#-------------------- Run the simulation -------------------------------------------------
+fix f2 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp and pressure conserved
 
 run             400000 # 0.1 [ns]
 
+#-------------------- End ----------------------------------------------------------------
