@@ -47,7 +47,6 @@ dump_modify     d1 element ${elem}
 
 #-------------------- Run the simulation -------------------------------------------------
 # Equilibrium system, calculation settings
-#fix f1 all nvt temp ${Tini} ${Tfin} $(100*dt)
 fix f1 all npt temp ${Tini} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp and pressure conserved
 
 run             80000 # 20 [ps]
@@ -63,7 +62,8 @@ dump_modify     d2 element ${elem}
 #----------------------------------------------------------------------
 
 #-------------------- Run the simulation -------------------------------------------------
-fix f2 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp and pressure conserved
+fix f2 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp conserved
+#fix f2 all nvt temp ${Tfin} ${Tfin} $(100*dt)
 
 run             400000 # 0.1 [ns]
 
