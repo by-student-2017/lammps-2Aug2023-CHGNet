@@ -20,3 +20,4 @@ Or you could use "chgnet_driver.py" and put the charges into magmoms, if there i
 One thing that is bothering me is that the force and virial are set to "+=", so I think I'll have to check that later. It would be fine if they were processed with "+=" after they reach 0 each time. I'll make time to check that later too. I am very worried because PLUMUD uses "=". I compared the force at the 1000th cycle of a simple system and the force at the initial structure before and after changing the code, and the values ​​were almost the same.
 
 In the "va0" version, "+=" is changed to "=" in "void PairCHGNet::performGNN()".
+If you use "va0", you do so at your own risk. Either delete "va0" from the file name or replace it with a file that does not have "va0".
