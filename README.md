@@ -2,7 +2,9 @@ Customized LAMMPS(2Aug2023) for Neural Network Potential, by AdvanceSoft Corp. <
 
 Comments -- By STUDENT ---
 
-Currently, the following improvements do not work well with calculations that include "d3". If you want to calculate an interface with an applied electric field, we recommend that you use QEq to calculate with the original state (advancesoftcorp/lammps).
+Currently, the following improvements do not work well with calculations that include "d3". 
+
+If you want to calculate an interface with an applied electric field, we recommend that you use QEq to calculate with the original state (advancesoftcorp/lammps).
 
 Since the calculation of "d3" is very heavy, there is also a method to use momb implemented in Lammps. The parameters are described in the original paper. I prepared a folder named momb as a reference example. When used in conjunction with "QEq", "CHGNet" and "M3GNet" will enable a fairly wide range of calculations.
 
