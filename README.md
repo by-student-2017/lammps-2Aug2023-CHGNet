@@ -2,7 +2,7 @@ Customized LAMMPS(2Aug2023) for Neural Network Potential, by AdvanceSoft Corp. <
 
 Comments -- By STUDENT ---
 
-Currently, the following improvements do not work well with calculations that include d3. If you want to calculate an interface with an applied electric field, we recommend that you use QEq to calculate with the original state.
+Currently, the following improvements do not work well with calculations that include d3. If you want to calculate an interface with an applied electric field, we recommend that you use QEq to calculate with the original state (advancesoftcorp/lammps).
 
 A "va0_q_magmom" is a prototype that can output MAGMOM (magnetic moment) as q (=charge) on Lammps. I don't have the capacity to convert MAGMOM values ​​to electric charge (q), so I'm leaving it as it is. Please be careful.
 
