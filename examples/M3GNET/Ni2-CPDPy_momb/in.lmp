@@ -26,16 +26,33 @@ pair_style hybrid/overlay m3gnet /mnt/d/lammps/potentials/M3GNET momb 12.0 0.75 
 #pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
 pair_coeff      * *  m3gnet M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
 
-pair_coeff 1 1 momb 0.0 1.0 1.0 111.9312 3.124  # Ni-Ni
-pair_coeff 1 2 momb 0.0 1.0 1.0  37.7739 2.959  # Ni-N
-pair_coeff 1 3 momb 0.0 1.0 1.0  45.0565 3.014  # Ni-C
-pair_coeff 1 4 momb 0.0 1.0 1.0  12.7439 2.563  # Ni-H
-pair_coeff 2 2 momb 0.0 1.0 1.0  12.7477 2.794  # N-N
-pair_coeff 2 3 momb 0.0 1.0 1.0  15.2054 2.849  # N-C
-pair_coeff 2 4 momb 0.0 1.0 1.0   4.3007 2.938  # N-H
-pair_coeff 3 3 momb 0.0 1.0 1.0  18.137  2.904  # C-C
-pair_coeff 3 4 momb 0.0 1.0 1.0   5.1299 2.453  # C-H
-pair_coeff 4 4 momb 0.0 1.0 1.0   1.4596 2.002  # H-H
+# atom type 1, Ni
+variable C6_1 equal 10.80 # Jnm6mol-1
+variable R0_1 equal 1.562 # Angstrom
+
+# atom type 2, N
+variable C6_2 equal 1.23  # Jnm6mol-1
+variable R0_2 equal 1.397 # Angstrom
+
+# atom type 3, C
+variable C6_3 equal 1.75  # Jnm6mol-1
+variable R0_3 equal 1.452 # Angstrom
+
+# atom type 4, H
+variable C6_4 equal 0.14  # Jnm6mol-1
+variable R0_4 equal 1.001 # Angstrom
+
+# convert [Jnm6mol-1] to [eVA6], (sqrt() or ()^0.5)
+pair_coeff 1 1 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_1)*10.364) $(v_R0_1 + v_R0_1) # Ni-Ni
+pair_coeff 1 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_2)*10.364) $(v_R0_1 + v_R0_2) # Ni-N
+pair_coeff 1 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_3)*10.364) $(v_R0_1 + v_R0_3) # Ni-C
+pair_coeff 1 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_4)*10.364) $(v_R0_1 + v_R0_4) # Ni-H
+pair_coeff 2 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_2)*10.364) $(v_R0_2 + v_R0_2) # N-N
+pair_coeff 2 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_3)*10.364) $(v_R0_2 + v_R0_3) # N-C
+pair_coeff 2 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_4)*10.364) $(v_R0_2 + v_R0_4) # N-H
+pair_coeff 3 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_3)*10.364) $(v_R0_3 + v_R0_3) # C-C
+pair_coeff 3 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_4)*10.364) $(v_R0_3 + v_R0_4) # C-H
+pair_coeff 4 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_4 * v_C6_4)*10.364) $(v_R0_4 + v_R0_4) # H-H
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
