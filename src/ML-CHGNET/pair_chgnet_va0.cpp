@@ -223,12 +223,12 @@ void PairCHGNet::performGNN()
     {
         volume = domain->xprd * domain->yprd * domain->zprd;
 
-        virial[0] = volume * this->stress[0]; // xx
-        virial[1] = volume * this->stress[1]; // yy
-        virial[2] = volume * this->stress[2]; // zz
-        virial[3] = volume * this->stress[3]; // yz
-        virial[4] = volume * this->stress[4]; // xz
-        virial[5] = volume * this->stress[5]; // xy
+        virial[0] = -volume * this->stress[0]; // xx
+        virial[1] = -volume * this->stress[1]; // yy
+        virial[2] = -volume * this->stress[2]; // zz
+        virial[3] = -volume * this->stress[3]; // yz
+        virial[4] = -volume * this->stress[4]; // xz
+        virial[5] = -volume * this->stress[5]; // xy
     }
 
     // set atomic charges
