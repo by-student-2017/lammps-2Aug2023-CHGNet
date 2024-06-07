@@ -8,6 +8,10 @@ If you want to calculate an interface with an applied electric field, we recomme
 
 Since the calculation of "d3" is very heavy, there is also a method to use momb implemented in Lammps. The parameters are described in the original paper. I prepared a folder named momb as a reference example. When used in conjunction with "QEq", "CHGNet" and "M3GNet" will enable a fairly wide range of calculations.
 
+momb: make yes-EXTRA-PAIR
+
+QEq: make yes-QEQ
+
 A "va0_q_magmom" is a prototype that can output MAGMOM (magnetic moment) as q (=charge) on Lammps. I don't have the capacity to convert MAGMOM values ​​to electric charge (q), so I'm leaving it as it is. Please be careful.
 
 A "va0" version gives a charge from Magmom. Currently, the provisional formula is given, but after calculating the same structure in the same structure for the calculation system, the charge is calculated so that the same value is calculated from the MAGMOM value. " pair_chgnet.cpp "should be added. 
