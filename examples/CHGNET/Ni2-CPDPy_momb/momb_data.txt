@@ -1,4 +1,6 @@
 #
+# Edisp = -s6*C6[i][j]/r[i][j]^6*fdamp(r[i][j],Rr[i][j]), fdamp(r,Rr) = 1/(1+exp{-d*(r/Rr-1)})
+#
 # pair_style momb cutoff s6 d
 #  s6 = global scaling factor of the exchange-correlation functional used (unitless)
 #    s6 = 0.75 (PBE), 1.2 (BLYP), 1.05 (B-P86), 1.0 (TPSS), and 1.05 (B3LYP)
