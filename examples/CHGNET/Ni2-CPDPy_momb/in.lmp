@@ -1,0 +1,83 @@
+#-------------------- Initialization -----------------------------------------------------
+clear
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file 
+atom_style      atomic
+boundary        p p p   # periodic boundary condition
+#-----------------------------------------------------------------------------------------
+variable Tini equal 300.0 # [K] (Initial temperature)
+variable Tfin equal 593.0 # [K] (Annealing temperature), other condition: 873 K, 973 K
+
+variable Nout equal 400 # every 400 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
+read_data       data.lammps
+
+replicate 1 1 1
+
+variable elem string "Ni N C H" # specifies the potential file used
+
+#-------------------- Force field --------------------------------------------------------
+pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+#pair_style    chgnet /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/d3 /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/gpu /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/d3/gpu /mnt/d/lammps/potentials/CHGNET
+
+pair_coeff    * *  chgnet/gpu 0.3.0 ${elem}
+
+pair_coeff 1 1 momb 0.0 1.0 1.0 111.9312 3.124  # Ni-Ni
+pair_coeff 1 2 momb 0.0 1.0 1.0  37.7739 2.959  # Ni-N
+pair_coeff 1 3 momb 0.0 1.0 1.0  45.0565 3.014  # Ni-C
+pair_coeff 1 4 momb 0.0 1.0 1.0  12.7439 2.563  # Ni-H
+pair_coeff 2 2 momb 0.0 1.0 1.0  12.7477 2.794  # N-N
+pair_coeff 2 3 momb 0.0 1.0 1.0  15.2054 2.849  # N-C
+pair_coeff 2 4 momb 0.0 1.0 1.0   4.3007 2.938  # N-H
+pair_coeff 3 3 momb 0.0 1.0 1.0  18.137  2.904  # C-C
+pair_coeff 3 4 momb 0.0 1.0 1.0   5.1299 2.453  # C-H
+pair_coeff 4 4 momb 0.0 1.0 1.0   1.4596 2.002  # H-H
+
+#-------------------- Energy Minimization ------------------------------------------------
+# 0 [K], structure optimization
+minimize 1.0e-4 1.0e-6 1000 10000
+
+#-------------------- Settings -----------------------------------------------------------
+reset_timestep 0
+
+timestep 0.00025 # 0.25 [fs] (Recommend 0.1-0.5 [fs]), sets the timestep for subsequent simulations
+
+thermo ${Nout}   # computes and prints thermodynamic 
+thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
+
+velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
+#-------------------- Equilibrium calculation --------------------------------------------
+
+#---------- output file settings --------------------------------------
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump_modify     d1 element ${elem}
+#----------------------------------------------------------------------
+
+#-------------------- Run the simulation -------------------------------------------------
+# Equilibrium system, calculation settings
+fix f1 all npt temp ${Tini} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp and pressure conserved
+
+run             80000 # 20 [ps]
+
+unfix  f1 # deletes the previously defined fix 1
+undump d1 # deletes the previously defined dump 1
+#-------------------- Annealing calculation ----------------------------------------------
+reset_timestep 0
+
+#---------- output file settings --------------------------------------
+dump            d2 all cfg ${Nout} cfg/run.*.${Tfin}K.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump_modify     d2 element ${elem}
+#----------------------------------------------------------------------
+
+#-------------------- Run the simulation -------------------------------------------------
+fix f2 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp conserved
+#fix f2 all nvt temp ${Tfin} ${Tfin} $(100*dt)
+
+run             400000 # 0.1 [ns]
+
+#-------------------- End ----------------------------------------------------------------
