@@ -13,6 +13,8 @@
 #    1.0 [J/mol * nm^6] = 1.0364e-5 * 10^6 [eV * A^6] = 10.364 [eV * A^6] (for metal units of Lammps)
 #  Rr[i][j] = R0[i] + R0[j], Rr (distance units, typically sum of atomic vdW radii on Lammps)
 #
+# see https://www.vasp.at/wiki/index.php/DFT-D2
+#
 # Table1. C6 Parameters (in J nm^6 mol^−1) and vander Waals Radii R0 (in Angstrom) for Elements H-Xe.
 #  Ref: Grimme, J Comput Chem, 27(15), 1787-1799 (2006).: https://doi.org/10.1002/jcc.20495
 # Elt	C6	R0
