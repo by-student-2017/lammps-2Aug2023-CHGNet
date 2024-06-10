@@ -58,8 +58,8 @@ def chgnet_initialize(model_name = None, as_path = False, dftd3 = False, gpu = T
             method  = "PBE",
             damping = "d3zero",
             s9      = 0.0,
-            cntoff  = 22.7, # default: 40 bohr
-            cutoff  = 22.7, # default: 95 bohr
+            cntoff  = 22.7, # = 12 Angstrom, default: 40 bohr
+            cutoff  = 22.7, # = 12 Angstrom,  default: 95 bohr
         )
         #dftd3Calculator = TorchDFTD3Calculator(
         #    xc      = "pbe",
