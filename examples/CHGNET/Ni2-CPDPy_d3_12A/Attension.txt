@@ -1,0 +1,5 @@
+#---------------------------------------------------------------------
+The default settings for dftd3 take too long to calculate, 
+so we set the cutoff to 12 Angstroms (12.8 is also often used), 
+which is the same as the momb (DFT-D2) in lammps.
+#---------------------------------------------------------------------
