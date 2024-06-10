@@ -21,8 +21,8 @@ variable elem string "Ni N C H" # specifies the potential file used
 #-------------------- Force field --------------------------------------------------------
 #pair_style    chgnet /mnt/d/lammps/potentials/CHGNET
 #pair_style    chgnet/d3 /mnt/d/lammps/potentials/CHGNET
-pair_style    chgnet/gpu /mnt/d/lammps/potentials/CHGNET
-#pair_style    chgnet/d3/gpu /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/gpu /mnt/d/lammps/potentials/CHGNET
+pair_style    chgnet/d3/gpu /mnt/d/lammps/potentials/CHGNET
 
 pair_coeff    * *  0.3.0 ${elem}
 
