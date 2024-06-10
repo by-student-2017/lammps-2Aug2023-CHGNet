@@ -63,8 +63,8 @@ dump_modify     d2 element ${elem}
 #----------------------------------------------------------------------
 
 #-------------------- Run the simulation -------------------------------------------------
-fix f2 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp conserved
-#fix f2 all nvt temp ${Tfin} ${Tfin} $(100*dt)
+fix f2 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt) # temp and pressure conserved
+#fix f2 all nvt temp ${Tfin} ${Tfin} $(100*dt) # temp conserved
 
 run             400000 # 0.1 [ns]
 
