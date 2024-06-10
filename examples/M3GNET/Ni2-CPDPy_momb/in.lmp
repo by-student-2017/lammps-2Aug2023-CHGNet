@@ -23,7 +23,7 @@ pair_style hybrid/overlay m3gnet /mnt/d/lammps/potentials/M3GNET momb 12.0 0.75 
 #pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
 #pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
 
-#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
+#pair_coeff      * *  m3gnet MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
 pair_coeff      * *  m3gnet M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
 
 # atom type 1, Ni
