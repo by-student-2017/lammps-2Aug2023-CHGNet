@@ -1,21 +1,28 @@
+#-------------------- Initialization -----------------------------------------------------
+clear
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
 units           metal
 atom_style      charge
 boundary        p p f
+#-----------------------------------------------------------------------------------------
+variable Tini equal 273+25  # [K] (Initial temperature)
+variable Tfin equal 273+900 # [K] (Annealing temperature)
 
+variable Nout equal  1000 # every 1000 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
 read_data       data_va0.lammps
 
 replicate 6 4 1
 
 group           gas type 4
 
-variable Tini equal 300.0 # [K]
-variable Tfin equal 600.0 # [K]
-variable Nout equal 100
+variable elem string "Li Mn O C"
 
+#-------------------- Force field --------------------------------------------------------
 pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
 #pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
-
-variable elem string "Li Mn O C"
 
 #pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
 pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
@@ -27,6 +34,7 @@ fix fq all qeq/slater 5 10 1.0e-6 100 qfile # alpha 0.2
 #fix fq all qeq/shielded 1 8 1.0e-6 100 qfile # failed
 #fix fq all qeq/fire 1 10 1.0e-3 100 qfile qdamp 0.2 qstep 0.1 # failed
 
+#-------------------- Settings -----------------------------------------------------------
 timestep 0.0001 # 0.1 [fs] (Recommend 0.1-0.5 [fs])
 
 thermo ${Nout}
@@ -34,6 +42,7 @@ thermo_style custom step time cpu cpuremain lx ly lz press pe temp
 
 velocity all create ${Tini} 12345 mom yes rot no
 
+#-------------------- Run the simulation -------------------------------------------------
 # Equilibrium system, calculation settings
 #fix f1 all nvt temp ${Tini} ${Tfin} $(100*dt)
 #fix f1 all npt temp ${Tini} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt)
@@ -50,8 +59,12 @@ variable va equal 2.0/lz
 fix kick all efield 0.0 0.0 v_va
 fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
 
+#---------- output file settings --------------------------------------
 dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
 dump_modify     d1 element ${elem}
 #dump_modify     d1 sort id
+#----------------------------------------------------------------------
 
 run             1000000
+
+#-------------------- End ----------------------------------------------------------------
