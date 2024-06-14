@@ -1,36 +1,46 @@
-units           metal
+#-------------------- Initialization -----------------------------------------------------
+clear
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file
 atom_style      charge
 boundary        p p f
+#-----------------------------------------------------------------------------------------
+variable Tini equal 273+25  # [K] (Initial temperature)
+variable Tfin equal 273+900 # [K] (Annealing temperature)
 
+variable Nout equal  1000 # every 1000 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
 read_data       data_va0.lammps
 
 replicate 4 4 1
 
-variable Tini equal 300.0 # [K]
-variable Tfin equal 600.0 # [K]
+variable elem string "Li Mn O"
 
 # If "CHGNet" is not +/- 30 % of this configuration (may be set in Read_data or MoleCule File), this set value is forcibly used.
 set type 1 charge +1
 set type 2 charge +3
 set type 3 charge -2
 
+#-------------------- Force field --------------------------------------------------------
 #pair_style    chgnet /mnt/d/lammps/src/ML-CHGNET
 #pair_style    chgnet/d3 /mnt/d/lammps/src/ML-CHGNET
 pair_style    chgnet/gpu /mnt/d/lammps/src/ML-CHGNET
 #pair_style    chgnet/d3/gpu /mnt/d/lammps/src/ML-CHGNET
 
-variable elem string "Li Mn O"
-
 pair_coeff    * *  0.3.0 ${elem}
 #pair_coeff    * *  path ./users_model.pt ${elem}
 
+#-------------------- Settings -----------------------------------------------------------
 timestep 0.0001 # 0.1 [fs] (Recommend 0.1-0.5 [fs])
 
-thermo 100
+thermo ${Nout}
 thermo_style custom step time cpu cpuremain lx ly lz press pe temp
 
 velocity all create ${Tini} 12345 mom yes rot no
 
+#-------------------- Run the simulation -------------------------------------------------
 # Equilibrium system, calculation settings
 #fix f1 all nvt temp ${Tini} ${Tfin} $(100*dt)
 
@@ -44,8 +54,12 @@ fix kick all efield 0.0 0.0 v_va
 #fix f0 all wall/reflect zhi EDGE # For boundary p p f
 fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
 
-dump            d1 all cfg 100 cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
+#---------- output file settings --------------------------------------
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
 dump_modify     d1 element ${elem}
 dump_modify     d1 sort id
+#----------------------------------------------------------------------
 
 run             10000
+
+#-------------------- End ----------------------------------------------------------------
