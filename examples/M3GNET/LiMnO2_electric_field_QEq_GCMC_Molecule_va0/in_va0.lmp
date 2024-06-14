@@ -7,7 +7,7 @@ atom_style      full
 boundary        p p f
 #-----------------------------------------------------------------------------------------
 variable Tini equal 273+25  # [K] (Initial temperature)
-variable Tfin equal 273+85 # [K] (Annealing temperature)
+variable Tfin equal 273+85  # [K] (Annealing temperature)
 
 variable Nout equal  1000 # every 1000 time steps to the specified file
 
