@@ -1,7 +1,17 @@
-units           metal
+#-------------------- Initialization -----------------------------------------------------
+clear
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file 
 atom_style      full
 boundary        p p f
+#-----------------------------------------------------------------------------------------
+variable Tini equal 273+25  # [K] (Initial temperature)
+variable Tfin equal 273+900 # [K] (Annealing temperature)
 
+variable Nout equal  1000 # every 1000 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
 read_data       data_va0.lammps
 
 replicate 6 4 1
@@ -12,21 +22,18 @@ region inside block $(xlo+1.0) $(xhi-1.0) $(ylo+1.0) $(yhi-1.0) $(v_substrate_to
 molecule        my_one_water H2O.txt
 group           water type 4:5
 
-variable Tini equal 300.0 # [K]
-variable Tfin equal 358.0 # [K]
-variable Nout equal 1000
+variable elem string "Li Mn O H O"
 
 # If "CHGNet" is not +/- 30 % of this configuration (may be set in Read_data or MoleCule File), this set value is forcibly used.
 set type 1 charge +1
 set type 2 charge +3
 set type 3 charge -2
 
+#-------------------- Force field --------------------------------------------------------
 #pair_style    chgnet /mnt/d/lammps/src/ML-CHGNET
 #pair_style    chgnet/d3 /mnt/d/lammps/src/ML-CHGNET
 pair_style    chgnet/gpu /mnt/d/lammps/src/ML-CHGNET
 #pair_style    chgnet/d3/gpu /mnt/d/lammps/src/ML-CHGNET
-
-variable elem string "Li Mn O H O"
 
 pair_coeff    * *  0.3.0 ${elem}
 #pair_coeff    * *  path ./users_model.pt ${elem}
@@ -37,6 +44,7 @@ fix fq all qeq/slater 5 10 1.0e-6 100 qfile # alpha 0.2
 #fix fq all qeq/shielded 1 8 1.0e-6 100 qfile # failed
 #fix fq all qeq/fire 1 10 1.0e-3 100 qfile qdamp 0.2 qstep 0.1 # failed
 
+#-------------------- Settings -----------------------------------------------------------
 timestep 0.0001 # 0.1 [fs] (Recommend 0.1-0.5 [fs])
 
 thermo ${Nout}
@@ -44,6 +52,7 @@ thermo_style custom step time cpu cpuremain lx ly lz press pe temp
 
 velocity all create ${Tini} 12345 mom yes rot no
 
+#-------------------- Run the simulation -------------------------------------------------
 compute mdtemp all temp
 compute_modify mdtemp dynamic/dof yes
 
@@ -64,8 +73,11 @@ variable va equal 1.5/lz
 fix kick all efield 0.0 0.0 v_va
 fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
 
+#---------- output file settings --------------------------------------
 dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
 dump_modify     d1 element ${elem}
 #dump_modify     d1 sort id
+#----------------------------------------------------------------------
 
 run             1000000
+#-------------------- End ----------------------------------------------------------------
