@@ -1,5 +1,0 @@
-#---------------------------------------------------------------------
-The default settings for dftd3 take too long to calculate, 
-so we set the cutoff to 6 Angstrom, 
-which is the same as the cutoff on CHGNet.
-#---------------------------------------------------------------------
