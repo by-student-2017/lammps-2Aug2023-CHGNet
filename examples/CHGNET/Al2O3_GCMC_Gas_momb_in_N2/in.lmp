@@ -24,7 +24,7 @@ variable elem string "Al O C N" # specifies the potential file used
 set type 1 charge +3
 set type 2 charge -2
 
-variable substrate_top equal 4.832813 
+variable substrate_top equal 9.6656255722
 region inside block $(xlo+1.0) $(xhi-1.0) $(ylo+1.0) $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
 
 #-------------------- Force field --------------------------------------------------------
@@ -66,7 +66,7 @@ pair_coeff 4 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_4 * v_C6_4)*10.364) $(v_R0_4 + v_R0_
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
-minimize 1.0e-4 1.0e-6 100 1000
+#minimize 1.0e-4 1.0e-6 100 1000
 
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
