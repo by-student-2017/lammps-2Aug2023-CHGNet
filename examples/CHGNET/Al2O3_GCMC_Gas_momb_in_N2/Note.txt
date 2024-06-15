@@ -1,0 +1,1 @@
+Please, rewrite "atom types" and "Masses" including data of gas.
