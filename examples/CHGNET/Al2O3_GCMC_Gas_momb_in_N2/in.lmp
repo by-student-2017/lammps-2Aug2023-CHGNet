@@ -9,7 +9,7 @@ boundary        p p p   # periodic boundary condition
 variable Tini equal 273+25  # [K] (Initial temperature)
 variable Tfin equal 273+900 # [K] (Annealing temperature)
 
-variable Nout equal  1000 # every 1000 time steps to the specified file
+variable Nout equal  400 # every 400 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 read_data       data.lammps
