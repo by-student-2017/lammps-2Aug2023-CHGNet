@@ -21,7 +21,7 @@ group           gas type 3
 variable elem string "Si O C N" # specifies the potential file used
 
 # If "CHGNet" is not +/- 30 % of this configuration (may be set in Read_data or MoleCule File), this set value is forcibly used.
-#set type 1 charge +3
+#set type 1 charge +4
 #set type 2 charge -2
 
 variable substrate_top equal 7.041767
