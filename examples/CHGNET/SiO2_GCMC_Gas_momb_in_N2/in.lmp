@@ -85,8 +85,7 @@ velocity all create ${Tfin} 12345 mom yes rot no # sets the velocity of a group 
 
 # non-equilibrium system, calculation settings
 fix f1 all nve
-#fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
-fix f2 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
+fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 
 # GCMC (gas = type 3)
 fix f3 gas gcmc 100 10 10 3 29494 ${Tfin} 0.0 0.01
