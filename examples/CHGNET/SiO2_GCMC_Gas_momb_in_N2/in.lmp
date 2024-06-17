@@ -25,7 +25,8 @@ variable elem string "Si O C N" # specifies the potential file used
 #set type 2 charge -2
 
 # set GCMC region
-variable substrate_top equal 14.0835342407
+#variable substrate_top equal 14.0835342407 # test
+variable substrate_top equal 7.041767
 region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+0.3) $(zhi-0.3)
 
 #-------------------- Force field --------------------------------------------------------
