@@ -14,7 +14,7 @@ variable Nout equal  200 # every 200 time steps to the specified file
 #-------------------- Atom & Lattice description ----------------------------------------
 read_data       data.lammps
 
-replicate 3 3 1
+replicate 2 2 1
 
 group           gas type 3
 
