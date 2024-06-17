@@ -24,7 +24,7 @@ variable elem string "Si O C N" # specifies the potential file used
 #set type 1 charge +4
 #set type 2 charge -2
 
-variable substrate_top equal 7.041767
+variable substrate_top equal 4.0835342407
 region inside block $(xlo+1.0) $(xhi-1.0) $(ylo+1.0) $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
 
 #-------------------- Force field --------------------------------------------------------
