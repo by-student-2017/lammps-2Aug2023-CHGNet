@@ -25,7 +25,7 @@ set type 1 charge +3
 set type 2 charge -2
 
 variable substrate_top equal 4.832813 
-region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+1.0) $(zhi-1.0)
+region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+0.3) $(zhi-0.3)
 
 #-------------------- Force field --------------------------------------------------------
 pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
