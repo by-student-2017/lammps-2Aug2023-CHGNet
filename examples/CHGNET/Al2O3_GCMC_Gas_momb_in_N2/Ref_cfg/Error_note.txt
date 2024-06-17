@@ -1,0 +1,243 @@
+
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 198.00 MiB (GPU 0; 8.00 GiB total capacity; 21.12 GiB already allocated; 0 bytes free; 21.70 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+ERROR: Cannot calculate energy, forces and stress by python of CHGNet. (../pair_chgnet.cpp:688)
+
+#----------------------------------------------------------------------------------------------------------------------------------
+mkdir: cannot create directory ‘cfg’: File exists
+LAMMPS (2 Aug 2023)
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file
+atom_style      charge
+boundary        p p p   # periodic boundary condition
+#-----------------------------------------------------------------------------------------
+variable Tini equal 273+25  # [K] (Initial temperature)
+variable Tfin equal 273+900 # [K] (Annealing temperature)
+
+variable Nout equal  400 # every 400 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
+read_data       data.lammps
+Reading data file ...
+  orthogonal box = (0 0 0) to (14.6593 16.793699 36.024799)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  965 atoms
+  read_data CPU = 0.011 seconds
+
+replicate 3 2 1
+Replication is creating a 3x2x1 = 6 times larger system...
+  orthogonal box = (0 0 0) to (43.9779 33.587399 36.024799)
+  1 by 1 by 1 MPI processor grid
+  5790 atoms
+  replicate CPU = 0.000 seconds
+
+group           gas type 3
+4134 atoms in group gas
+
+variable elem string "Al O C N" # specifies the potential file used
+
+# If "CHGNet" is not +/- 30 % of this configuration (may be set in Read_data or MoleCule File), this set value is forcibly used.
+#set type 1 charge +3
+#set type 2 charge -2
+
+variable substrate_top equal 9.0248
+region inside block $(xlo+1.0) $(xhi-1.0) $(ylo+1.0) $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
+region inside block 1 $(xhi-1.0) $(ylo+1.0) $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
+region inside block 1 42.977899551500001962 $(ylo+1.0) $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
+region inside block 1 42.977899551500001962 1 $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
+region inside block 1 42.977899551500001962 1 32.587398528999997893 $(v_substrate_top+1.0) $(zhi-1.0)
+region inside block 1 42.977899551500001962 1 32.587398528999997893 10.024800000000000821 $(zhi-1.0)
+region inside block 1 42.977899551500001962 1 32.587398528999997893 10.024800000000000821 35.024799346899996522
+
+#-------------------- Force field --------------------------------------------------------
+pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+#pair_style    chgnet /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/d3 /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/gpu /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/d3/gpu /mnt/d/lammps/potentials/CHGNET
+
+pair_coeff    * *  chgnet/gpu 0.3.0 ${elem}
+pair_coeff    * *  chgnet/gpu 0.3.0 Al O C N
+CHGNet v0.3.0 initialized with 412,525 parameters
+CHGNet will run on cuda:0
+CHGNet will run on cuda:0
+
+# atom type 1, Al
+variable C6_1 equal 10.79 # Jnm6mol-1
+variable R0_1 equal 1.639 # Angstrom
+
+# atom type 2, O
+variable C6_2 equal 0.7   # Jnm6mol-1
+variable R0_2 equal 1.342 # Angstrom
+
+# atom type 3, C
+variable C6_3 equal 1.75  # Jnm6mol-1
+variable R0_3 equal 1.452 # Angstrom
+
+# atom type 4, N
+variable C6_4 equal 1.23  # Jnm6mol-1
+variable R0_4 equal 1.397 # Angstrom
+
+# convert [Jnm6mol-1] to [eVA6], (sqrt() or ()^0.5)
+pair_coeff 1 1 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_1)*10.364) $(v_R0_1 + v_R0_1) # Al-Al
+pair_coeff 1 1 momb 0.0 1.0 1.0 111.8275600000000054 $(v_R0_1 + v_R0_1)
+pair_coeff 1 1 momb 0.0 1.0 1.0 111.8275600000000054 3.2780000000000000249
+pair_coeff 1 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_2)*10.364) $(v_R0_1 + v_R0_2) # Al-O
+pair_coeff 1 2 momb 0.0 1.0 1.0 28.483092919976233048 $(v_R0_1 + v_R0_2)
+pair_coeff 1 2 momb 0.0 1.0 1.0 28.483092919976233048 2.9809999999999998721
+pair_coeff 1 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_3)*10.364) $(v_R0_1 + v_R0_3) # Al-C
+pair_coeff 1 3 momb 0.0 1.0 1.0 45.035724216670487863 $(v_R0_1 + v_R0_3)
+pair_coeff 1 3 momb 0.0 1.0 1.0 45.035724216670487863 3.0910000000000001918
+pair_coeff 1 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_4)*10.364) $(v_R0_1 + v_R0_4) # Al-N
+pair_coeff 1 4 momb 0.0 1.0 1.0 37.756409034271257497 $(v_R0_1 + v_R0_4)
+pair_coeff 1 4 momb 0.0 1.0 1.0 37.756409034271257497 3.036000000000000032
+pair_coeff 2 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_2)*10.364) $(v_R0_2 + v_R0_2) # O-O
+pair_coeff 2 2 momb 0.0 1.0 1.0 7.2548000000000003595 $(v_R0_2 + v_R0_2)
+pair_coeff 2 2 momb 0.0 1.0 1.0 7.2548000000000003595 2.6840000000000001634
+pair_coeff 2 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_3)*10.364) $(v_R0_2 + v_R0_3) # O-C
+pair_coeff 2 3 momb 0.0 1.0 1.0 11.470845984494779657 $(v_R0_2 + v_R0_3)
+pair_coeff 2 3 momb 0.0 1.0 1.0 11.470845984494779657 2.7940000000000000391
+pair_coeff 2 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_4)*10.364) $(v_R0_2 + v_R0_4) # O-N
+pair_coeff 2 4 momb 0.0 1.0 1.0 9.6167644795949964731 $(v_R0_2 + v_R0_4)
+pair_coeff 2 4 momb 0.0 1.0 1.0 9.6167644795949964731 2.7389999999999998792
+pair_coeff 3 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_3)*10.364) $(v_R0_3 + v_R0_3) # C-C
+pair_coeff 3 3 momb 0.0 1.0 1.0 18.137000000000000455 $(v_R0_3 + v_R0_3)
+pair_coeff 3 3 momb 0.0 1.0 1.0 18.137000000000000455 2.9039999999999999147
+pair_coeff 3 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_4)*10.364) $(v_R0_3 + v_R0_4) # C-N
+pair_coeff 3 4 momb 0.0 1.0 1.0 15.205439738462022348 $(v_R0_3 + v_R0_4)
+pair_coeff 3 4 momb 0.0 1.0 1.0 15.205439738462022348 2.849000000000000199
+pair_coeff 4 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_4 * v_C6_4)*10.364) $(v_R0_4 + v_R0_4) # N-N
+pair_coeff 4 4 momb 0.0 1.0 1.0 12.74772000000000105 $(v_R0_4 + v_R0_4)
+pair_coeff 4 4 momb 0.0 1.0 1.0 12.74772000000000105 2.7940000000000000391
+
+#-------------------- Energy Minimization ------------------------------------------------
+# 0 [K], structure optimization
+#minimize 1.0e-4 1.0e-6 100 1000
+
+#-------------------- Settings -----------------------------------------------------------
+reset_timestep 0
+
+timestep 0.00025 # 0.25 [fs] (Recommend 0.1-0.5 [fs]), sets the timestep for subsequent simulations
+
+thermo ${Nout}   # computes and prints thermodynamic
+thermo 400
+thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
+
+velocity all create ${Tfin} 12345 mom yes rot no # sets the velocity of a group of atoms
+velocity all create 1173 12345 mom yes rot no
+
+#-------------------- Run the simulation -------------------------------------------------
+# Equilibrium system, calculation settings
+#fix f1 all nvt temp ${Tfin} ${Tfin} $(100*dt)
+#fix f1 all npt temp ${Tfin} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt)
+
+# non-equilibrium system, calculation settings
+fix f1 all nve
+fix f2 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
+fix f2 all langevin 1173 ${Tfin} $(100*dt) 1234567
+fix f2 all langevin 1173 1173 $(100*dt) 1234567
+fix f2 all langevin 1173 1173 0.025000000000000001388 1234567
+
+# GCMC (gas = type 3)
+fix f3 gas gcmc 100 1 1 3 29494 ${Tfin} 0.0 0.01
+fix f3 gas gcmc 100 1 1 3 29494 1173 0.0 0.01
+
+# E-field component values (electric field units) (electric field = volts/Angstrom)
+#variable va equal 2.0/lz
+#fix kick all efield 0.0 0.0 v_va
+#fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
+
+#---------- output file settings --------------------------------------
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
+dump            d1 all cfg 400 cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
+dump_modify     d1 element ${elem}
+dump_modify     d1 element Al O C N
+#dump_modify     d1 sort id
+#----------------------------------------------------------------------
+
+run             1000000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+- Pair style momb: doi:10.1021/jp412098n
+The log file lists these citations in BibTeX format.
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+WARNING: Fix gcmc using full_energy option (../fix_gcmc.cpp:526)
+0 atoms in group FixGCMC:gcmc_exclusion_group:f3
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 14
+  ghost atom cutoff = 14
+  binsize = 7, bins = 7 5 6
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair chgnet/gpu, perpetual
+      attributes: full, newton on, cut 8
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+  (2) pair momb, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 0
+  Time step     : 0.00025
+Traceback (most recent call last):
+  File "/mnt/d/lammps/potentials/CHGNET/chgnet_driver.py", line 115, in chgnet_get_energy_forces_stress
+    energy = myAtoms.get_potential_energy().item()
+  File "/home/inukai/miniconda3/lib/python3.10/site-packages/ase/atoms.py", line 731, in get_potential_energy
+    energy = self._calc.get_potential_energy(self)
+  File "/home/inukai/miniconda3/lib/python3.10/site-packages/ase/calculators/calculator.py", line 709, in get_potential_energy
+    energy = self.get_property('energy', atoms)
+  File "/home/inukai/miniconda3/lib/python3.10/site-packages/ase/calculators/calculator.py", line 737, in get_property
+    self.calculate(atoms, [name], system_changes)
+  File "/home/inukai/.local/lib/python3.10/site-packages/chgnet/model/dynamics.py", line 135, in calculate
+    model_prediction = self.model.predict_graph(
+  File "/home/inukai/.local/lib/python3.10/site-packages/chgnet/model/model.py", line 622, in predict_graph
+    prediction = self.forward(
+  File "/home/inukai/.local/lib/python3.10/site-packages/chgnet/model/model.py", line 365, in forward
+    prediction = self._compute(
+  File "/home/inukai/.local/lib/python3.10/site-packages/chgnet/model/model.py", line 448, in _compute
+    bond_feas = bond_layer(
+  File "/home/inukai/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/inukai/.local/lib/python3.10/site-packages/chgnet/model/layers.py", line 246, in forward
+    bond_weights_j = torch.index_select(bond_weights, 0, bond_graph[:, 2])
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 198.00 MiB (GPU 0; 8.00 GiB total capacity; 21.12 GiB already allocated; 0 bytes free; 21.70 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+ERROR: Cannot calculate energy, forces and stress by python of CHGNet. (../pair_chgnet.cpp:688)
+Last command: run             1000000
+terminate called after throwing an instance of 'c10::Error'
+  what():  invalid device pointer: 0x20e000000
+Exception raised from free at ../c10/cuda/CUDACachingAllocator.cpp:2058 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::string) + 0x57 (0x7f6341d9e4d7 in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, std::string const&) + 0x64 (0x7f6341d6836b in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #2: <unknown function> + 0x22f0e (0x7f6347a5af0e in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x4ccec6 (0x7f6312216ec6 in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+frame #4: <unknown function> + 0x3ee77 (0x7f6341d83e77 in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #5: c10::TensorImpl::~TensorImpl() + 0x1be (0x7f6341d7c69e in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #6: c10::TensorImpl::~TensorImpl() + 0x9 (0x7f6341d7c7b9 in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #7: <unknown function> + 0x752478 (0x7f631249c478 in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+frame #8: THPVariable_subclass_dealloc(_object*) + 0x305 (0x7f631249c805 in /home/inukai/.local/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #24: <unknown function> + 0x45495 (0x7f637b735495 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #25: on_exit + 0 (0x7f637b735610 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #26: <unknown function> + 0x43cda0 (0x55f2726e4da0 in /mnt/d/lammps/src/lmp_serial)
+frame #27: <unknown function> + 0x6cbf7e (0x55f272973f7e in /mnt/d/lammps/src/lmp_serial)
+frame #28: <unknown function> + 0x6cc388 (0x55f272974388 in /mnt/d/lammps/src/lmp_serial)
+frame #29: <unknown function> + 0x753003 (0x55f2729fb003 in /mnt/d/lammps/src/lmp_serial)
+frame #30: <unknown function> + 0x2d6b72 (0x55f27257eb72 in /mnt/d/lammps/src/lmp_serial)
+frame #31: <unknown function> + 0x26d849 (0x55f272515849 in /mnt/d/lammps/src/lmp_serial)
+frame #32: <unknown function> + 0x17138c (0x55f27241938c in /mnt/d/lammps/src/lmp_serial)
+frame #33: <unknown function> + 0x171d2e (0x55f272419d2e in /mnt/d/lammps/src/lmp_serial)
+frame #34: <unknown function> + 0x148769 (0x55f2723f0769 in /mnt/d/lammps/src/lmp_serial)
+frame #35: <unknown function> + 0x29d90 (0x7f637b719d90 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #36: __libc_start_main + 0x80 (0x7f637b719e40 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #37: <unknown function> + 0x14b675 (0x55f2723f3675 in /mnt/d/lammps/src/lmp_serial)
+
+./run.sh: line 5:  2683 Aborted                 /mnt/d/lammps/src/lmp_serial -in in.lmp
