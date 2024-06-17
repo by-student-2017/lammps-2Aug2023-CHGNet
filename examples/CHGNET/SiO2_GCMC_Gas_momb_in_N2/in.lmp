@@ -88,12 +88,7 @@ fix f1 all nve
 fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 
 # GCMC (gas = type 3)
-fix f3 gas gcmc 100 5 5 3 29494 ${Tini} 0.0 0.01
-
-# E-field component values (electric field units) (electric field = volts/Angstrom)
-#variable va equal 2.0/lz
-#fix kick all efield 0.0 0.0 v_va
-#fix f0 all wall/reflect zlo EDGE zhi EDGE # For boundary p p f
+fix f3 gas gcmc 100 8 8 3 29494 ${Tini} 0.0 0.01
 
 #---------- output file settings --------------------------------------
 dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
@@ -106,7 +101,7 @@ run             100000 # 100 ps
 unfix f3
 #-------------------- Run the simulation -------------------------------------------------
 # GCMC (gas = type 3)
-fix f4 gas gcmc 100 3 3 3 29494 ${Tfin} 0.0 0.01
+fix f4 gas gcmc 100 4 4 3 29494 ${Tfin} 0.0 0.01
 
 run             1000000 # 1 ns
 
