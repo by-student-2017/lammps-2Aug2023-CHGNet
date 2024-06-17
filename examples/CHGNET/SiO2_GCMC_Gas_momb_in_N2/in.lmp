@@ -9,7 +9,7 @@ boundary        p p p   # periodic boundary condition
 variable Tini equal 273+25  # [K] (Initial temperature)
 variable Tfin equal 273+900 # [K] (Annealing temperature)
 
-variable Nout equal  400 # every 400 time steps to the specified file
+variable Nout equal  100 # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 read_data       data.lammps
@@ -76,7 +76,7 @@ timestep 0.002 # 2.0 [fs] (Recommend 0.1-2.0 [fs]), sets the timestep for subseq
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
 
-velocity all create ${Tfin} 12345 mom yes rot no # sets the velocity of a group of atoms
+velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
 
 #-------------------- Run the simulation -------------------------------------------------
 # Equilibrium system, calculation settings
@@ -88,7 +88,7 @@ fix f1 all nve
 fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 
 # GCMC (gas = type 3)
-fix f3 gas gcmc 100 10 10 3 29494 ${Tfin} 0.0 0.01
+fix f3 gas gcmc 100 15 15 3 29494 ${Tini} 0.0 0.01
 
 # E-field component values (electric field units) (electric field = volts/Angstrom)
 #variable va equal 2.0/lz
