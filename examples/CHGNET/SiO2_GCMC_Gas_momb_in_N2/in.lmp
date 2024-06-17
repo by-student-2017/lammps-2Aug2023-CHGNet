@@ -24,7 +24,7 @@ variable elem string "Si O C N" # specifies the potential file used
 #set type 1 charge +4
 #set type 2 charge -2
 
-variable substrate_top equal 4.0835342407
+variable substrate_top equal 14.0835342407
 region inside block $(xlo+1.0) $(xhi-1.0) $(ylo+1.0) $(yhi-1.0) $(v_substrate_top+1.0) $(zhi-1.0)
 
 #-------------------- Force field --------------------------------------------------------
@@ -66,7 +66,7 @@ pair_coeff 4 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_4 * v_C6_4)*10.364) $(v_R0_4 + v_R0_
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
-#minimize 1.0e-4 1.0e-6 100 1000
+minimize 1.0e-4 1.0e-6 100 1000
 
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
@@ -88,7 +88,7 @@ fix f1 all nve
 fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 
 # GCMC (gas = type 3)
-fix f3 gas gcmc 100 6 6 3 29494 ${Tini} 0.0 0.01
+fix f3 gas gcmc 100 5 5 3 29494 ${Tini} 0.0 0.01
 
 # E-field component values (electric field units) (electric field = volts/Angstrom)
 #variable va equal 2.0/lz
