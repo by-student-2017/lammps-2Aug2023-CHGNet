@@ -76,8 +76,7 @@ timestep 0.001 # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subseq
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
 
-# 15 K
-velocity all create 77 12345 mom yes rot no # sets the velocity of a group of atoms
+velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
 
 #-------------------- Run the simulation -------------------------------------------------
 # Equilibrium system, calculation settings
@@ -89,7 +88,7 @@ fix f1 all nve
 fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 
 # GCMC (gas = type 3)
-fix f3 gas gcmc 100 5 5 3 29494 ${Tini} 0.0 0.01
+fix f3 gas gcmc 100 10 10 3 29494 ${Tini} 0.0 0.01
 
 # E-field component values (electric field units) (electric field = volts/Angstrom)
 #variable va equal 2.0/lz
