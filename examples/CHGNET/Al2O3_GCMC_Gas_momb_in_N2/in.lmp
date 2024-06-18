@@ -27,7 +27,7 @@ variable elem string "Al O C N" # specifies the potential file used
 
 # set GCMC region
 variable substrate_top equal 4.8864312172
-region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+0.3) $(zhi-0.3)
+region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+0.5) $(zhi-0.5)
 
 #-------------------- Force field --------------------------------------------------------
 pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
@@ -73,10 +73,16 @@ minimize 1.0e-4 1.0e-6 100 1000
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
 
-timestep 0.0001 # 0.1 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+timestep 0.00025 # 0.25 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
+
+#---------- output file settings --------------------------------------
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
+dump_modify     d1 element ${elem}
+#dump_modify     d1 sort id
+#----------------------------------------------------------------------
 
 velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
 
@@ -90,15 +96,9 @@ fix f1 all nve
 fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 
 # GCMC (gas = type 3)
-fix f3 gas gcmc 100 7 7 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
+fix f3 gas gcmc 100 6 6 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
 
-#---------- output file settings --------------------------------------
-dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
-dump_modify     d1 element ${elem}
-#dump_modify     d1 sort id
-#----------------------------------------------------------------------
-
-run             500 # 50 fs
+run             4000 # 1 ps
 
 unfix f2
 unfix f3
@@ -108,7 +108,7 @@ fix f4 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
 # GCMC (gas = type 3)
 fix f5 gas gcmc 100 3 3 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
 
-run             40000 # 4 ps
+run             40000 # 10 ps
 
 unfix f4
 unfix f5
@@ -118,6 +118,6 @@ fix f6 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
 # GCMC (gas = type 3)
 fix f7 gas gcmc 100 1 1 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
 
-run             100000 # 10 ps
+run             100000 # 25 ps
 
 #-------------------- End ----------------------------------------------------------------
