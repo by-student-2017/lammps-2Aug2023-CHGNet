@@ -98,7 +98,7 @@ fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
 # GCMC (gas = type 3)
 fix f3 gas gcmc 100 6 6 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
 
-run             4000 # 1 ps
+run             2000 # 0.5 ps
 
 unfix f2
 unfix f3
