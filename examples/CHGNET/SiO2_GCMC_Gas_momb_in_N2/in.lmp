@@ -73,7 +73,7 @@ minimize 1.0e-4 1.0e-6 100 1000
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
 
-timestep 0.0001 # 0.1 [fs] (Recommend 0.1-0.25 [fs]), sets the timestep for subsequent simulations
+timestep 0.001 # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
@@ -98,20 +98,26 @@ dump_modify     d1 element ${elem}
 #dump_modify     d1 sort id
 #----------------------------------------------------------------------
 
-run             10000 # 1 ps
+run             1000 # 1 ps
 
+unfix f2
 unfix f3
 #-------------------- Run the simulation -------------------------------------------------
-# GCMC (gas = type 3)
-fix f4 gas gcmc 100 3 3 3 29494 ${Tfin} 0.0 0.01
+fix f4 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
 
-run             40000 # 4 ps
+# GCMC (gas = type 3)
+fix f5 gas gcmc 100 3 3 3 29494 ${Tfin} 0.0 0.01 region inside
+
+run             10000 # 10 ps
 
 unfix f4
+unfix f5
 #-------------------- Run the simulation -------------------------------------------------
-# GCMC (gas = type 3)
-fix f5 gas gcmc 100 1 1 3 29494 ${Tfin} 0.0 0.01
+fix f6 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
 
-run             400000 # 40 ps
+# GCMC (gas = type 3)
+fix f7 gas gcmc 100 1 1 3 29494 ${Tfin} 0.0 0.01 region inside
+
+run             100000 # 100 ps
 
 #-------------------- End ----------------------------------------------------------------
