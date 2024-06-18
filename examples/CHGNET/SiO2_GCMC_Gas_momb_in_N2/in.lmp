@@ -28,7 +28,7 @@ variable elem string "Si O C N" # specifies the potential file used
 # set GCMC region
 #variable substrate_top equal 14.0835342407 # test
 variable substrate_top equal 7.041767
-region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+0.5) $(zhi-0.5)
+region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+1.2) $(zhi-1.2)
 
 #-------------------- Force field --------------------------------------------------------
 pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
