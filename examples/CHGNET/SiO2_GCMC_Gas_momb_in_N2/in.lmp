@@ -99,7 +99,7 @@ dump_modify     d1 element ${elem}
 #dump_modify     d1 sort id
 #----------------------------------------------------------------------
 
-run             1000 # 0.1 ps
+run             500 # 50 fs
 
 unfix f2
 unfix f3
