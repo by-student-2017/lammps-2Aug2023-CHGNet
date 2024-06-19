@@ -76,11 +76,6 @@ reset_timestep 0
 
 timestep 0.00025 # 0.25 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
-# Delete overlapping atoms
-#-------------------------------------
-delete_atoms overlap 0.35 all all
-#-------------------------------------
-
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
 
@@ -114,6 +109,12 @@ run             2000 # 0.5 ps
 unfix f2
 unfix f3
 #-------------------- Run the simulation -------------------------------------------------
+
+# Delete overlapping atoms
+#-------------------------------------
+delete_atoms overlap 0.5 all all
+#-------------------------------------
+
 fix f4 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
 fix_modify f4 temp mdtemp
 
@@ -125,6 +126,12 @@ run             10000 # 2.5 ps
 unfix f4
 unfix f5
 #-------------------- Run the simulation -------------------------------------------------
+
+# Delete overlapping atoms
+#-------------------------------------
+delete_atoms overlap 0.5 all all
+#-------------------------------------
+
 fix f6 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
 fix_modify f6 temp mdtemp
 
