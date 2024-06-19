@@ -73,7 +73,7 @@ minimize 1.0e-4 1.0e-6 100 1000
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
 
-timestep 0.00025 # 0.25 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+timestep 0.0005 # 0.5 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
@@ -87,37 +87,52 @@ dump_modify     d1 element ${elem}
 velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
 
 #-------------------- Run the simulation -------------------------------------------------
-# Equilibrium system, calculation settings
+compute mdtemp all temp
+compute_modify mdtemp dynamic/dof yes
+
+## Equilibrium system, calculation settings
 #fix f1 all nvt temp ${Tini} ${Tfin} $(100*dt)
 #fix f1 all npt temp ${Tini} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt)
+#fix_modify f1 temp mdtemp
 
 # non-equilibrium system, calculation settings
 fix f1 all nve
 fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
+fix_modify f2 temp mdtemp
 
 # GCMC (gas = type 3)
-fix f3 gas gcmc 100 6 6 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
+fix f3 gas gcmc 100 6 6 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff 0.7
 
-run             2000 # 0.5 ps
+run             2000 # 10 ps
 
 unfix f2
 unfix f3
 #-------------------- Run the simulation -------------------------------------------------
+
+## Delete overlapping atoms
+#delete_atoms overlap 0.7 all all
+
 fix f4 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
+fix_modify f4 temp mdtemp
 
 # GCMC (gas = type 3)
-fix f5 gas gcmc 100 3 3 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
+fix f5 gas gcmc 100 3 3 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff 0.7
 
-run             10000 # 2.5 ps
+run             10000 # 5 ps
 
 unfix f4
 unfix f5
 #-------------------- Run the simulation -------------------------------------------------
+
+## Delete overlapping atoms
+#delete_atoms overlap 0.7 all all
+
 fix f6 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
+fix_modify f6 temp mdtemp
 
 # GCMC (gas = type 3)
-fix f7 gas gcmc 100 1 1 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside
+fix f7 gas gcmc 100 1 1 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff 0.7
 
-run             100000 # 25 ps
+run             100000 # 50 ps
 
 #-------------------- End ----------------------------------------------------------------
