@@ -25,9 +25,12 @@ variable elem string "Si O C N" # specifies the potential file used
 #set type 1 charge +4
 #set type 2 charge -2
 
+# set overlap_cutoff (Note: H-H: 1.06 A) => about 70%
+variable overlap_cutoff_value equal 0.74
+
 # set GCMC region
 variable substrate_top equal 7.041767
-region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+1.0) $(zhi-1.0)
+region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+v_overlap_cutoff_value) $(zhi-v_overlap_cutoff_value)
 
 #-------------------- Force field --------------------------------------------------------
 pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
@@ -73,7 +76,7 @@ minimize 1.0e-4 1.0e-6 100 1000
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
 
-timestep 0.0005 # 0.5 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+timestep 0.00025 # 0.25 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
@@ -97,42 +100,42 @@ compute_modify mdtemp dynamic/dof yes
 
 # non-equilibrium system, calculation settings
 fix f1 all nve
-fix f2 all langevin ${Tini} ${Tfin} $(100*dt) 1234567
+fix f2 all langevin ${Tini} ${Tfin} $(50*dt) 1234567
 fix_modify f2 temp mdtemp
 
 # GCMC (gas = type 3)
-fix f3 gas gcmc 100 6 6 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff 0.7
+fix f3 gas gcmc 100 6 6 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff ${overlap_cutoff_value}
 
-run             2000 # 10 ps
+run             2000 # 5 ps
 
 unfix f2
 unfix f3
 #-------------------- Run the simulation -------------------------------------------------
 
 ## Delete overlapping atoms
-#delete_atoms overlap 0.7 all all
+#delete_atoms overlap ${overlap_cutoff_value} all all
 
-fix f4 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
+fix f4 all langevin ${Tfin} ${Tfin} $(50*dt) 1234567
 fix_modify f4 temp mdtemp
 
 # GCMC (gas = type 3)
-fix f5 gas gcmc 100 3 3 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff 0.7
+fix f5 gas gcmc 100 3 3 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff ${overlap_cutoff_value}
 
-run             10000 # 5 ps
+run             10000 # 2.5 ps
 
 unfix f4
 unfix f5
 #-------------------- Run the simulation -------------------------------------------------
 
 ## Delete overlapping atoms
-#delete_atoms overlap 0.7 all all
+#delete_atoms overlap ${overlap_cutoff_value} all all
 
-fix f6 all langevin ${Tfin} ${Tfin} $(100*dt) 1234567
+fix f6 all langevin ${Tfin} ${Tfin} $(50*dt) 1234567
 fix_modify f6 temp mdtemp
 
 # GCMC (gas = type 3)
-fix f7 gas gcmc 100 1 1 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff 0.7
+fix f7 gas gcmc 100 1 1 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff ${overlap_cutoff_value}
 
-run             100000 # 50 ps
+run             100000 # 25 ps
 
 #-------------------- End ----------------------------------------------------------------
