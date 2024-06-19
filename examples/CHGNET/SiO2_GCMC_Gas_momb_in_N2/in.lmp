@@ -27,6 +27,7 @@ variable elem string "Si O C N" # specifies the potential file used
 
 # set overlap_cutoff (Note: H-H: 1.06 A) => about 70%
 variable overlap_cutoff_value equal 0.74
+# for 1.0 A case: https://doi.org/10.1107/S205327331501757X
 
 # set GCMC region
 variable substrate_top equal 7.041767
