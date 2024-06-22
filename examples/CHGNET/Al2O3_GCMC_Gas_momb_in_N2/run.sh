@@ -1,6 +1,10 @@
 #!/bin/bash
 
+#lammps_adress=/mnt/d/lammps
+lammps_adress=$HOME/lammps
+
 mkdir cfg
 
-/mnt/d/lammps/src/lmp_serial -in in.lmp
+${lammps_adress}/src/lmp_serial -in in.lmp
+
 
