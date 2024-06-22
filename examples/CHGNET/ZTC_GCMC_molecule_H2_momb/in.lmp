@@ -6,7 +6,7 @@ units           metal   # determines units of all quantities used in the input f
 atom_style      full
 boundary        p p p   # periodic boundary condition
 #-----------------------------------------------------------------------------------------
-variable Tini equal 273-40.0 # [K] (Initial temperature)
+variable Tini equal 273-18   # [K] (Initial temperature)
 variable Tfin equal 273+25   # [K] (Annealing temperature)
 
 variable Pfin index   13.0   # [bar] (Note 1.0 bar = 0.1 MPa)
@@ -72,7 +72,7 @@ minimize 1.0e-4 1.0e-6 100 1000
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
 
-timestep 0.0005 # 0.5 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+timestep 0.00025 # 0.25 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
@@ -102,7 +102,7 @@ fix_modify f1 temp mdtemp
 # GCMC
 fix f3 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tfin} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value}
 
-run             20000 # 10 ps
+run             20000 # 5 ps
 
 unfix f1
 #-------------------- Run the simulation -------------------------------------------------
@@ -110,6 +110,6 @@ unfix f1
 fix f2 all npt temp ${Tfin} ${Tfin} $(20*dt) iso ${Pfin} ${Pfin} $(200*dt)
 fix_modify f2 temp mdtemp
 
-run             40000 # 40 ps
+run             40000 # 20 ps
 
 #-------------------- End ----------------------------------------------------------------
