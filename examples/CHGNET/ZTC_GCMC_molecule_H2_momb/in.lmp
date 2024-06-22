@@ -37,9 +37,13 @@ variable elem string "C H H" # specifies the potential file used
 variable overlap_cutoff_value equal 0.9
 
 #-------------------- Force field --------------------------------------------------------
+# GPU case
 pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
-
 pair_coeff    * *  chgnet/gpu 0.3.0 ${elem}
+
+# CPU case
+#pair_style hybrid/overlay chgnet /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+#pair_coeff    * *  chgnet 0.3.0 ${elem}
 
 # atom type 1, C
 variable C6_1 equal 1.75  # Jnm6mol-1
