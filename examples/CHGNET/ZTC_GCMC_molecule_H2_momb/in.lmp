@@ -33,8 +33,8 @@ group           gas type 3
 
 variable elem string "C H H" # specifies the potential file used
 
-# set overlap_cutoff (Note: H-H: 1.06 A)
-variable overlap_cutoff_value equal 0.9
+# set overlap_cutoff (Note: H-H: 1.06 A) => about 70%
+variable overlap_cutoff_value equal 0.74
 
 #-------------------- Force field --------------------------------------------------------
 # GPU case
