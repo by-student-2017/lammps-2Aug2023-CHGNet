@@ -3,67 +3,71 @@ clear
 echo            both    # echoes each input script command to both log file and screen
 #-----------------------------------------------------------------------------------------
 units           metal   # determines units of all quantities used in the input file 
-atom_style      full
+atom_style      charge
 boundary        p p p   # periodic boundary condition
 #-----------------------------------------------------------------------------------------
-variable Tini equal 273+25   # [K] (Initial temperature)
-variable Tfin equal 273+25   # [K] (Annealing temperature)
+variable Tini equal 273+25  # [K] (Initial temperature)
+variable Tfin equal 273+900 # [K] (Annealing temperature)
 
-variable Nout equal  100     # every 100 time steps to the specified file
-
-variable   natom index 1
-variable   nmove index 1     # shake method need 0
-variable   mu    index -5.46 # Fermi Energy (eV) from MOPAC2016 PM7
-variable   disp  index 0.01
-
-variable   Pfin  index 1.0   # (bar units), 1.0 bar = 0.1 MPa 
-
-variable   tfac  equal 5.0/3.0 # (3 trans + 2 rot)/(3 trans) for molecular (2 atoms)
-# trans = 3, rot = 2 (line), rot = 3 (non-line), vib = 3n-5 (line), vib = 3n-6 (non-line)
-# total = 3n = 3+2+3n-5 = 3+3+3n-6
-# vib = about 0.0 at R.T. for molecular (2 atoms)
+variable Nout equal  100 # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 read_data       data.lammps
 
-replicate 1 1 1
+replicate 2 2 1
 
-molecule        my_one_gas ./molecular_files/H2.txt
-group           gas type 3
+variable gas_num equal 3
+group           gas type ${gas_num}
 
-variable elem string "C H H" # specifies the potential file used
+variable elem string "Si O C N" # specifies the potential file used
 
-# set overlap_cutoff (Note: H-H: 1.06 A)
-variable overlap_cutoff_value equal 0.9
+# If "CHGNet" is not +/- 30 % of this configuration (may be set in Read_data or MoleCule File), this set value is forcibly used.
+#set type 1 charge +4
+#set type 2 charge -2
+
+# set overlap_cutoff (Note: H-H: 1.06 A) => about 70%
+variable overlap_cutoff_value equal 0.74
+
+# set GCMC region
+variable substrate_top equal 7.041767
+region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(v_substrate_top+v_overlap_cutoff_value) $(zhi-v_overlap_cutoff_value)
 
 #-------------------- Force field --------------------------------------------------------
 pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+#pair_style    chgnet /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/d3 /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/gpu /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/d3/gpu /mnt/d/lammps/potentials/CHGNET
 
 pair_coeff    * *  chgnet/gpu 0.3.0 ${elem}
 
-# atom type 1, C
-variable C6_1 equal 1.75  # Jnm6mol-1
-variable R0_1 equal 1.452 # Angstrom
+# atom type 1, Si
+variable C6_1 equal 9.23  # Jnm6mol-1
+variable R0_1 equal 1.716 # Angstrom
 
-# atom type 2, H
-variable C6_2 equal 0.14  # Jnm6mol-1
-variable R0_2 equal 1.001 # Angstrom
+# atom type 2, O
+variable C6_2 equal 0.7   # Jnm6mol-1
+variable R0_2 equal 1.342 # Angstrom
 
-# atom type 3, H
-variable C6_3 equal 0.14  # Jnm6mol-1
-variable R0_3 equal 1.001 # Angstrom
+# atom type 3, C
+variable C6_3 equal 1.75  # Jnm6mol-1
+variable R0_3 equal 1.452 # Angstrom
+
+# atom type 4, N
+variable C6_4 equal 1.23  # Jnm6mol-1
+variable R0_4 equal 1.397 # Angstrom
 
 # convert [Jnm6mol-1] to [eVA6], (sqrt() or ()^0.5)
-#-----------------------------------------------------------------------------------------
-pair_coeff 1 1 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_1)*10.364) $(v_R0_1 + v_R0_1) # C-C
-pair_coeff 1 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_2)*10.364) $(v_R0_1 + v_R0_2) # C-H
-pair_coeff 1 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_3)*10.364) $(v_R0_1 + v_R0_3) # C-H
-#-----------------------------------------------------------------------------------------
-pair_coeff 2 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_2)*10.364) $(v_R0_2 + v_R0_2) # H-H
-pair_coeff 2 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_3)*10.364) $(v_R0_2 + v_R0_3) # H-H
-#-----------------------------------------------------------------------------------------
-pair_coeff 3 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_3)*10.364) $(v_R0_3 + v_R0_3) # H-H
-#-----------------------------------------------------------------------------------------
+pair_coeff 1 1 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_1)*10.364) $(v_R0_1 + v_R0_1) # Si-Si
+pair_coeff 1 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_2)*10.364) $(v_R0_1 + v_R0_2) # Si-O
+pair_coeff 1 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_3)*10.364) $(v_R0_1 + v_R0_3) # Si-C
+pair_coeff 1 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_4)*10.364) $(v_R0_1 + v_R0_4) # Si-N
+pair_coeff 2 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_2)*10.364) $(v_R0_2 + v_R0_2) # O-O
+pair_coeff 2 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_3)*10.364) $(v_R0_2 + v_R0_3) # O-C
+pair_coeff 2 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_4)*10.364) $(v_R0_2 + v_R0_4) # O-N
+pair_coeff 3 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_3)*10.364) $(v_R0_3 + v_R0_3) # C-C
+pair_coeff 3 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_4)*10.364) $(v_R0_3 + v_R0_4) # C-N
+pair_coeff 4 4 momb 0.0 1.0 1.0 $(sqrt(v_C6_4 * v_C6_4)*10.364) $(v_R0_4 + v_R0_4) # N-N
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
@@ -72,13 +76,13 @@ minimize 1.0e-4 1.0e-6 100 1000
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
 
-timestep 0.001 # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+timestep 0.00025 # 0.25 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
 
 #---------- output file settings --------------------------------------
-dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz q
 dump_modify     d1 element ${elem}
 #dump_modify     d1 sort id
 #----------------------------------------------------------------------
@@ -90,18 +94,48 @@ compute mdtemp all temp
 compute_modify mdtemp dynamic/dof yes
 
 ## Equilibrium system, calculation settings
-#fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt)
-fix f1 all npt temp ${Tini} ${Tfin} $(20*dt) iso 1.0 ${Pfin} $(200*dt)
-fix_modify f1 temp mdtemp
+#fix f1 all nvt temp ${Tini} ${Tfin} $(100*dt)
+#fix f1 all npt temp ${Tini} ${Tfin} $(100*dt) iso 1.0 1.0 $(1000*dt)
+#fix_modify f1 temp mdtemp
 
 # non-equilibrium system, calculation settings
-#fix f1 all nve
-#fix f2 all langevin ${Tini} ${Tfin} $(20*dt) 12345
-#fix_modify f2 temp mdtemp
+fix f1 all nve
+fix f2 all langevin ${Tini} ${Tfin} $(20*dt) 1234567
+fix_modify f2 temp mdtemp
 
-# GCMC
-fix f3 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tfin} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value}
+# GCMC (gas = type 3)
+fix f3 gas gcmc 100 6 6 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff ${overlap_cutoff_value}
 
-run             100000 # 100 ps
+run             2000 # 5 ps
+
+unfix f2
+unfix f3
+#-------------------- Run the simulation -------------------------------------------------
+
+## Delete overlapping atoms
+#delete_atoms overlap ${overlap_cutoff_value} all all
+
+fix f4 all langevin ${Tfin} ${Tfin} $(20*dt) 1234567
+fix_modify f4 temp mdtemp
+
+# GCMC (gas = type 3)
+fix f5 gas gcmc 100 3 3 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff ${overlap_cutoff_value}
+
+run             10000 # 2.5 ps
+
+unfix f4
+unfix f5
+#-------------------- Run the simulation -------------------------------------------------
+
+## Delete overlapping atoms
+#delete_atoms overlap ${overlap_cutoff_value} all all
+
+fix f6 all langevin ${Tfin} ${Tfin} $(20*dt) 1234567
+fix_modify f6 temp mdtemp
+
+# GCMC (gas = type 3)
+fix f7 gas gcmc 100 1 1 ${gas_num} 29494 ${Tini} 0.0 0.01 region inside overlap_cutoff ${overlap_cutoff_value}
+
+run             100000 # 25 ps
 
 #-------------------- End ----------------------------------------------------------------
