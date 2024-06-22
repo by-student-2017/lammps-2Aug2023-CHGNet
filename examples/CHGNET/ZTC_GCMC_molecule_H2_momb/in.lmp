@@ -95,7 +95,7 @@ compute_modify mdtemp dynamic/dof yes
 
 ## Equilibrium system, calculation settings
 #fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt)
-fix f1 all npt temp ${Tini} ${Tfin} $(20*dt) iso 1.0 ${Pfin} $(200*dt)
+fix f1 all npt temp ${Tini} ${Tfin} $(20*dt) iso 0.0 ${Pfin} $(200*dt)
 fix_modify f1 temp mdtemp
 
 # non-equilibrium system, calculation settings
