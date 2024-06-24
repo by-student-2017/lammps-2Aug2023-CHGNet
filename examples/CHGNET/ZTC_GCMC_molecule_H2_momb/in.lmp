@@ -116,7 +116,7 @@ fix f4 all npt temp ${Tfin} ${Tfin} $(20*dt) iso ${Pfin} ${Pfin} $(200*dt)
 fix_modify f4 temp mdtemp
 
 region inside block $(xlo) $(xhi) $(ylo) $(yhi) $(zlo) $(zhi)
-fix f5 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tfin} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value} region inside
+fix f5 gas gcmc ${Nout} 1 1 0 12345 ${Tfin} ${mu} 0.01 mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value} region inside
 
 run             20000 # 2 ps
 
