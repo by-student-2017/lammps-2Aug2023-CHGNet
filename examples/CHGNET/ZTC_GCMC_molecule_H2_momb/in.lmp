@@ -104,15 +104,18 @@ fix_modify f1 temp mdtemp
 #fix_modify f2 temp mdtemp
 
 # GCMC
-fix f3 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tfin} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value}
+fix f3 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tini} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value}
 
 run             20000 # 2 ps
 
 unfix f1
+unfix f3
 #-------------------- Run the simulation -------------------------------------------------
 #fix f2 all nvt temp ${Tini} ${Tfin} $(20*dt)
-fix f2 all npt temp ${Tfin} ${Tfin} $(20*dt) iso ${Pfin} ${Pfin} $(200*dt)
-fix_modify f2 temp mdtemp
+fix f4 all npt temp ${Tfin} ${Tfin} $(20*dt) iso ${Pfin} ${Pfin} $(200*dt)
+fix_modify f4 temp mdtemp
+
+fix f5 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tfin} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value}
 
 run             80000 # 8 ps
 
