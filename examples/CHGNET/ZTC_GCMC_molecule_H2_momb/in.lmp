@@ -106,7 +106,7 @@ fix_modify f1 temp mdtemp
 # GCMC
 fix f3 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tini} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value}
 
-run             20000 # 2 ps
+run             10000 # 1 ps
 
 unfix f1
 unfix f3
@@ -117,6 +117,6 @@ fix_modify f4 temp mdtemp
 
 fix f5 gas gcmc ${Nout} ${natom} ${nmove} 0 12345 ${Tfin} ${mu} ${disp} mol my_one_gas pressure ${Pfin} tfac_insert ${tfac} full_energy overlap_cutoff ${overlap_cutoff_value}
 
-run             80000 # 8 ps
+run             20000 # 2 ps
 
 #-------------------- End ----------------------------------------------------------------
