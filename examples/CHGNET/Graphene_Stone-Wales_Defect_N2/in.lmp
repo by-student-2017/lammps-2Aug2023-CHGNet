@@ -2,7 +2,7 @@
 
 #-------------------- Environment Settings ------------------------------------------------
 variable TL equal  100.0 # K
-variable TH equal 5500.0 # K (airebo:2500.0, tersoff:1800.0)
+variable TH equal 4500.0 # K (airebo:2500.0, tersoff:1800.0)
 variable dt equal  0.001 # ps
 
 #-------------------- Initialization -----------------------------------------------------
