@@ -1,0 +1,5 @@
+Note
+- First-principles calculations show that the formation energy of graphitic nitrogen is approximately 0.5 eV.
+- Since 1 eV = approximately 10,000 K, a simulation performed at around 5,000 K allows us to observe the reaction according to the Arrhenius or Boltzmann distribution.
+- The key to determining the time scale is to infer it from calculations and experimental results for similar systems, and to specify the temperature at which the reaction is likely to occur.
+- If raising the temperature destroys all of the structure or causes unnecessary reactions, you can choose to use the NEB method or steadily investigate several structural models (this is more time-consuming but takes less time).
