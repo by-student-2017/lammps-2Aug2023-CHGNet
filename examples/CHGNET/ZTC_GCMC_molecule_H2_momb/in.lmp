@@ -30,6 +30,7 @@ replicate 1 1 1
 
 molecule        my_one_gas ./molecular_files/H2.txt
 group           gas type 3
+variable        atoms_of_gas equal 2 # The number of atoms per gas molecule
 
 variable elem string "C H H" # specifies the potential file used
 
@@ -85,14 +86,14 @@ reset_timestep 0
 
 timestep 0.0005  # 0.5 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
-variable        ngas equal count(gas) # The number of atoms of interest in the gas (e.g., H2, N2, CO2, H2O, He, Ar, Kr, etc) (Note: group gas type 3)
+variable        ngas equal count(gas)/${atoms_of_gas} # The number of molecules (e.g., H2, N2, CO2, H2O, He, Ar, Kr, etc)
 
-variable        wtp  equal v_ngas/mass(all)*100 # Mass Percent Concentration, wt.% [dimensionless] (Absolute, Not excess)
+variable        wtp  equal mass(gas)/mass(all)*100 # Mass Percent Concentration, wt.% [dimensionless] (Absolute, Not excess)
 
-#variable        molc equal (v_ngas/2/6.022e23)/(vol*1e-30) # molar concentration [mol/m^3] (Absolute, Not excess)
-variable        molL equal (v_ngas/2/6.022e23)/(vol*1e-27) # molar concentration [mol/L] = [mol/dm^3] (Absolute, Not excess)
+#variable        molc equal (v_ngas/6.022e23)/(vol*1e-30) # molar concentration [mol/m^3] (Absolute, Not excess)
+variable        molL equal (v_ngas/6.022e23)/(vol*1e-27) # molar concentration [mol/L] = [mol/dm^3] (Absolute, Not excess)
 
-variable        mc   equal (v_ngas/6.022e23/1000)/(vol*1e-30) # Mass Concentration [kg/m^3] (Absolute, Not excess)
+variable        mc   equal (mass(gas)/6.022e23/1000)/(vol*1e-30) # Mass Concentration [kg/m^3] (Absolute, Not excess)
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal v_ngas v_wtp v_molL v_mc # specifies content of thermodynamic data to be printed in screen
