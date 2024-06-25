@@ -1,0 +1,2 @@
+Note
+- For carbon systems, CHGNet may be better than M3GNet because it behaves similarly to DFTB+.
