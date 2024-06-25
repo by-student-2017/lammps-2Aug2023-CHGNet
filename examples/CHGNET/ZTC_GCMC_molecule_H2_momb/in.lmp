@@ -87,12 +87,12 @@ timestep 0.0005  # 0.5 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subs
 
 variable        ngas equal count(gas) # Gas (e.g., H2, N2, CO2, H2O, He, Ar, Kr, etc)
 
-variable        wtp  equal v_ngas*2/mass(all)*100 # Mass Percent Concentration, wt.% [dimensionless]
+variable        wtp  equal v_ngas*2/mass(all)*100 # Mass Percent Concentration, wt.% [dimensionless] (Absolute, Not excess)
 
-#variable        molc equal (v_ngas/6.022e23)/(vol*1e-30) # molar concentration [mol/m^3]
-variable        molL equal (v_ngas/6.022e23)/(vol*1e-27) # molar concentration [mol/L] = [mol/dm^3]
+#variable        molc equal (v_ngas/6.022e23)/(vol*1e-30) # molar concentration [mol/m^3] (Absolute, Not excess)
+variable        molL equal (v_ngas/6.022e23)/(vol*1e-27) # molar concentration [mol/L] = [mol/dm^3] (Absolute, Not excess)
 
-variable        mc   equal (v_ngas/6.022e23*2.0/1000)/(vol*1e-30) # Mass Concentration [kg/m^3]
+variable        mc   equal (v_ngas/6.022e23*2.0/1000)/(vol*1e-30) # Mass Concentration [kg/m^3] (Absolute, Not excess)
 
 thermo ${Nout}   # computes and prints thermodynamic 
 thermo_style custom step temp vol press etotal v_ngas v_wtp v_molL v_mc # specifies content of thermodynamic data to be printed in screen
