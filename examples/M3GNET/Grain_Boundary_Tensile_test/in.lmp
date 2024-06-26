@@ -1,0 +1,117 @@
+# LAMMPS Input File for Grain Boundaries 
+#-------------------- Initialization -----------------------------------------------------
+clear
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file 
+atom_style      atomic
+boundary        p p p   # periodic boundary condition
+
+#-----------------------------------------------------------------------------------------
+variable Tini equal 273+25   # [K] (Initial temperature)
+variable Tfin equal 273+25   # [K] (Annealing temperature)
+
+variable Pini index    1.0   # [bar] (Note 1.0 bar = 0.1 MPa)
+
+variable Nout equal    100   # every 100 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
+lattice fcc 3.5101 
+
+variable xh index 12
+variable yh index 12
+variable zh index 6
+
+region whole block 0 ${xh} -${xh} ${xh} 0 ${zh} units box 
+create_box 2 whole 
+
+region upper block 0 ${xh}  0 ${yh} 0 ${zh} units box 
+lattice fcc 3.5101 orient x 2 1 0 orient y 1 -2 0 orient z 0 0 -1 
+create_atoms 1 region upper 
+
+region lower block 0 ${xh} -${yh} 0 0 ${zh} units box 
+lattice fcc 3.5101 orient x 1 2 0 orient y 2 -1 0 orient z 0 0 -1 
+create_atoms 2 region lower 
+
+group upper type 1 # Fe in upper
+group lower type 2 # Fe in lower
+
+variable elem string "Fe Co"
+
+mass 1 55.85 # Fe
+mass 2 58.93 # Co
+
+#-------------------- Force field --------------------------------------------------------
+pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
+#pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
+
+#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
+
+#-------------------- Settings -----------------------------------------------------------
+neighbor 2.0 bin 
+neigh_modify delay 10 check yes
+
+timestep 0.0001  # 0.1 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+
+# ------------------- Displace atoms and delete overlapping atoms ------------------------
+displace_atoms upper move 0 0 0 units lattice 
+delete_atoms overlap 0.35 lower upper 
+
+#-------------------- Energy Minimization ------------------------------------------------
+# 0 [K], structure optimization
+thermo ${Nout}
+thermo_style custom step temp pe etotal press vol fmax fnorm
+
+fix             emin all box/relax aniso ${Pini}
+min_style       cg
+min_modify      dmax 0.2
+min_modify      line quadratic
+minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
+unfix           emin
+
+#-------------------- Settings -----------------------------------------------------------
+reset_timestep 0
+
+compute csym all centro/atom fcc
+
+# Store final cell length for strain calculations
+variable tmp equal "ly"
+variable L0 equal ${tmp}
+print "Initial Length, L0: ${L0}"
+
+# Output strain and stress info to file
+# for units metal, pressure is in [bars] = 100 [kPa] = 1/10000 [GPa]
+# p2, p3, p4 are in GPa
+variable strain equal "(ly - v_L0)/v_L0"
+variable p1 equal "v_strain"
+variable p2 equal "-pxx/10000"
+variable p3 equal "-pyy/10000"
+variable p4 equal "-pzz/10000"
+fix def1 all ave/time 1 10 ${Nout} v_p1 v_p2 v_p3 v_p4 ave one file tensile.txt
+
+thermo ${Nout}
+thermo_style custom step temp etotal lx lz ly pyy v_strain v_p3
+
+#---------- output file settings -------------------------
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs c_csym id type vx vy vz fx fy fz
+dump_modify     d1 element ${elem}
+#---------------------------------------------------------
+
+velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
+
+#-------------------- Run the simulation -------------------------------------------------
+variable  srate equal 1.0e9
+variable srate1 equal "v_srate/1.0e12"
+
+#fix f1 all npt temp ${Tini} ${Tfin} $(1000*dt) x ${Pini} ${Pini} $(1000*dt) z ${Pini} ${Pini} $(1000*dt) drag 1.0
+fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt)
+fix f2 all deform 1 y erate ${srate1} units box remap v
+
+run             20000 # 2 ps
+
+print "All done"
+
+# Note
+print "The rapid change in stress above a certain strain is due to the introduction of large deformations such as dislocations into the system."
+#-------------------- End ----------------------------------------------------------------
