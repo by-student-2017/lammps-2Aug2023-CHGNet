@@ -13,7 +13,7 @@ variable Tfin equal 273+25   # [K] (Annealing temperature)
 
 variable Pini index    1.0   # [bar] (Note 1.0 bar = 0.1 MPa)
 
-variable Nout equal     10   # every 10 time steps to the specified file
+variable Nout equal    100   # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 lattice fcc 3.5101 
@@ -53,7 +53,7 @@ pair_coeff    * *  0.3.0 ${elem}
 neighbor 2.0 bin 
 neigh_modify delay 10 check yes
 
-timestep 0.0001  # 0.1 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+timestep 0.001  # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
 # ------------------- Displace atoms and delete overlapping atoms ------------------------
 displace_atoms upper move 0 0 0 units lattice 
@@ -68,7 +68,7 @@ fix             emin all box/relax aniso ${Pini}
 min_style       cg
 min_modify      dmax 0.2
 min_modify      line quadratic
-minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
+minimize        0.0 1.0e-10 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
 unfix           emin
 
 #-------------------- Settings -----------------------------------------------------------
@@ -102,14 +102,17 @@ dump_modify     d1 element ${elem}
 velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
 
 #-------------------- Run the simulation -------------------------------------------------
-variable  srate equal 1.0e9
+variable  srate equal 1.0e10
 variable srate1 equal "v_srate/1.0e12"
 
 #fix f1 all npt temp ${Tini} ${Tfin} $(1000*dt) x ${Pini} ${Pini} $(1000*dt) z ${Pini} ${Pini} $(1000*dt) drag 1
 fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt)
 fix f2 all deform 1 y erate ${srate1} units box remap v
 
-run             40000 # 4 ps
+run             20000 # 20 ps
 
 print "All done"
+
+# Note
+print "The rapid change in stress above a certain strain is due to the introduction of large deformations such as dislocations into the system."
 #-------------------- End ----------------------------------------------------------------
