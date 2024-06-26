@@ -68,7 +68,7 @@ fix             emin all box/relax aniso ${Pini}
 min_style       cg
 min_modify      dmax 0.2
 min_modify      line quadratic
-minimize        0.0 1.0e-8 10000 100000
+minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
 unfix           emin
 
 #-------------------- Settings -----------------------------------------------------------
