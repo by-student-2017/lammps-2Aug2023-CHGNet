@@ -89,7 +89,7 @@ variable p1 equal "v_strain"
 variable p2 equal "-pxx/10000"
 variable p3 equal "-pyy/10000"
 variable p4 equal "-pzz/10000"
-fix def1 all ave/time 1 ${Nout} ${Nout} v_p1 v_p2 v_p3 v_p4 file tensile.txt
+fix def1 all ave/time 1 10 ${Nout} v_p1 v_p2 v_p3 v_p4 ave one file tensile.txt
 
 thermo ${Nout}
 thermo_style custom step temp etotal lx lz ly pyy v_strain v_p3
