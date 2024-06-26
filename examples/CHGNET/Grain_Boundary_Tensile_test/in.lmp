@@ -13,7 +13,7 @@ variable Tfin equal 273+25   # [K] (Annealing temperature)
 
 variable Pini index    1.0   # [bar] (Note 1.0 bar = 0.1 MPa)
 
-variable Nout equal    100   # every 100 time steps to the specified file
+variable Nout equal     10   # every 10 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 lattice fcc 3.5101 
@@ -109,7 +109,7 @@ variable srate1 equal "v_srate/1.0e12"
 fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt)
 fix f2 all deform 1 y erate ${srate1} units box remap v
 
-run             20000 # 2 ps
+run             40000 # 4 ps
 
 print "All done"
 #-------------------- End ----------------------------------------------------------------
