@@ -68,7 +68,7 @@ fix             emin all box/relax aniso ${Pini}
 min_style       cg
 min_modify      dmax 0.2
 min_modify      line quadratic
-minimize        1.0e-10 1.0e-12 1000 100000
+minimize        1.0e-10 1.0e-12 10000 100000
 unfix           emin
 
 #-------------------- Settings -----------------------------------------------------------
