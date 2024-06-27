@@ -104,8 +104,12 @@ velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group 
 variable  srate equal 1.0e9
 variable srate1 equal "v_srate/1.0e12"
 
-#fix f1 all npt temp ${Tini} ${Tfin} $(1000*dt) x ${Pini} ${Pini} $(1000*dt) z ${Pini} ${Pini} $(1000*dt) drag 1.0
+# non-equilibrium MD (NEMD)
 fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt)
+
+# semi-equilibrium MD (NEMD)
+#fix f1 all npt temp ${Tini} ${Tfin} $(1000*dt) x ${Pini} ${Pini} $(1000*dt) z ${Pini} ${Pini} $(1000*dt) drag 1.0
+
 fix f2 all deform 1 y erate ${srate1} units box remap v
 
 run             20000 # 2 ps
