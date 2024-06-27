@@ -36,10 +36,16 @@ create_atoms 2 region lower
 group upper type 1 # Fe in upper
 group lower type 2 # Fe in lower
 
-variable elem string "Fe Co"
-
 mass 1 55.85 # Fe
 mass 2 58.93 # Co
+
+#----- Displace atoms and delete overlapping atoms -----
+displace_atoms upper move 0 0 0 units lattice 
+delete_atoms overlap 0.35 lower upper 
+
+#read_data minimize_data.lammps
+
+variable elem string "Fe Co"
 
 #-------------------- Force field --------------------------------------------------------
 pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
@@ -53,10 +59,6 @@ neighbor 2.0 bin
 neigh_modify delay 10 check yes
 
 timestep 0.0001  # 0.1 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
-
-# ------------------- Displace atoms and delete overlapping atoms ------------------------
-displace_atoms upper move 0 0 0 units lattice 
-delete_atoms overlap 0.35 lower upper 
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
