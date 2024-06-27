@@ -1,4 +1,5 @@
 # LAMMPS Input File for Grain Boundaries 
+# Input file for uniaxial tensile loading of the grain boundary
 #-------------------- Initialization -----------------------------------------------------
 clear
 echo            both    # echoes each input script command to both log file and screen
