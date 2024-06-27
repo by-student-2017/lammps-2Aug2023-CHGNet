@@ -34,11 +34,11 @@ region lower block 0 ${xh} -${yh} 0 0 ${zh} units box
 lattice fcc 3.5101 orient x 1 2 0 orient y 2 -1 0 orient z 0 0 -1 
 create_atoms 2 region lower 
 
-group upper type 1 # Fe in upper
+group upper type 1 # Co in upper
 group lower type 2 # Fe in lower
 
-mass 1 55.85 # Fe
-mass 2 58.93 # Co
+mass 1 55.85 # Co
+mass 2 58.93 # Fe
 
 #----- Displace atoms and delete overlapping atoms -----
 displace_atoms upper move 0 0 0 units lattice 
@@ -46,7 +46,7 @@ delete_atoms overlap 0.35 lower upper
 
 #read_data minimize_data.lammps
 
-variable elem string "Fe Co"
+variable elem string "Co Fe"
 
 #-------------------- Force field --------------------------------------------------------
 pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
@@ -72,6 +72,8 @@ min_modify      dmax 0.2
 min_modify      line quadratic
 minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
 unfix           emin
+
+write_data minimize_data.lammps
 
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
