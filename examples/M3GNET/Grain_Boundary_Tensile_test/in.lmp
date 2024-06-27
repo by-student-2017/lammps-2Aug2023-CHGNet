@@ -119,8 +119,8 @@ fix f2 all deform 1 y erate ${srate1} units box remap v
 
 run             20000 # 2 ps
 
-print "All done"
-
 # Note
 print "The rapid change in stress above a certain strain is due to the introduction of large deformations such as dislocations into the system."
+
+print "All done"
 #-------------------- End ----------------------------------------------------------------
