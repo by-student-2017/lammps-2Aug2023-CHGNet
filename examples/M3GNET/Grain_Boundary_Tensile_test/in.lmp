@@ -63,17 +63,17 @@ timestep 0.0001  # 0.1 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subs
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
-#thermo ${Nout}
-#thermo_style custom step temp pe etotal press vol fmax fnorm
+thermo ${Nout}
+thermo_style custom step temp pe etotal press vol fmax fnorm
 
-#fix             emin all box/relax aniso ${Pini}
-#min_style       cg
-#min_modify      dmax 0.2
-#min_modify      line quadratic
-#minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
-#unfix           emin
+fix             emin all box/relax aniso ${Pini}
+min_style       cg
+min_modify      dmax 0.2
+min_modify      line quadratic
+minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
+unfix           emin
 
-#write_data minimize_data.lammps
+write_data minimize_data.lammps
 
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
