@@ -22,7 +22,7 @@ variable xh index 12
 variable yh index 12
 variable zh index 6
 
-region whole block 0 ${xh} -${xh} ${xh} 0 ${zh} units box 
+region whole block 0 ${xh} -${yh} ${yh} 0 ${zh} units box 
 create_box 2 whole 
 
 region upper block 0 ${xh}  0 ${yh} 0 ${zh} units box 
