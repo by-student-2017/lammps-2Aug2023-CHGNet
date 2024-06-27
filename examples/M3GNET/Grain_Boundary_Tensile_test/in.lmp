@@ -63,17 +63,17 @@ timestep 0.0001  # 0.1 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subs
 
 #-------------------- Energy Minimization ------------------------------------------------
 # 0 [K], structure optimization
-thermo ${Nout}
-thermo_style custom step temp pe etotal press vol fmax fnorm
+#thermo ${Nout}
+#thermo_style custom step temp pe etotal press vol fmax fnorm
 
-fix             emin all box/relax aniso ${Pini}
-min_style       cg
-min_modify      dmax 0.2
-min_modify      line quadratic
-minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
-unfix           emin
+#fix             emin all box/relax aniso ${Pini}
+#min_style       cg
+#min_modify      dmax 0.2
+#min_modify      line quadratic
+#minimize        0.0 1.0e-8 10000 100000 # This condition is necessary to make the residual stress sufficiently small.
+#unfix           emin
 
-write_data minimize_data.lammps
+#write_data minimize_data.lammps
 
 #-------------------- Settings -----------------------------------------------------------
 reset_timestep 0
@@ -109,13 +109,17 @@ velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group 
 variable  srate equal 1.0e9
 variable srate1 equal "v_srate/1.0e12"
 
-# non-equilibrium MD (NEMD)
-fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt)
+# non-equilibrium MD (NEMD), case 1
+#fix f1 all nvt temp ${Tini} ${Tfin} $(20*dt) drag 0.2
+#fix f2 all deform 1 y erate ${srate1} units box remap v
 
-# semi-equilibrium MD (SEMD)
-#fix f1 all npt temp ${Tini} ${Tfin} $(1000*dt) x ${Pini} ${Pini} $(1000*dt) z ${Pini} ${Pini} $(1000*dt) drag 1.0
-
+# non-equilibrium MD (NEMD), case 2
+fix f1 all nvt/sllod temp ${Tini} ${Tfin} $(20*dt) drag 0.2
 fix f2 all deform 1 y erate ${srate1} units box remap v
+
+# semi-equilibrium MD (SEMD), case 1
+#fix f1 all npt temp ${Tini} ${Tfin} $(1000*dt) x ${Pini} ${Pini} $(1000*dt) z ${Pini} ${Pini} $(1000*dt) drag 1.0
+#fix f2 all deform 1 y erate ${srate1} units box remap x
 
 run             20000 # 2 ps
 
