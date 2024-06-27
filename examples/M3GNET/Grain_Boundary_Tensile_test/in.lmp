@@ -40,10 +40,6 @@ group lower type 2 # Fe in lower
 mass 1 55.85 # Co
 mass 2 58.93 # Fe
 
-#----- Displace atoms and delete overlapping atoms -----
-displace_atoms upper move 0 0 0 units lattice 
-delete_atoms overlap 0.35 lower upper 
-
 #read_data minimize_data.lammps
 
 variable elem string "Co Fe"
@@ -55,9 +51,13 @@ pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
 #pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
 pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
 
+#----- Displace atoms and delete overlapping atoms ---------------------------------------
+displace_atoms upper move 0 0 0 units lattice 
+delete_atoms overlap 0.35 lower upper 
+
 #-------------------- Settings -----------------------------------------------------------
-neighbor 2.0 bin 
-neigh_modify delay 10 check yes
+#neighbor 2.0 bin 
+#neigh_modify delay 10 check yes
 
 timestep 0.0001  # 0.1 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
