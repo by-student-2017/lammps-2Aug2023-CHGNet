@@ -1,0 +1,146 @@
+#-----------------------------------------------------------------------------------------
+# 4.2 Creation of Al-Si-Mg-Cu-Fe alloys
+#  Test: LAMMPS 64-bit 22Dec2022-MSMPI version
+#-----------------------------------------------------------------------------------------
+# Note: The key is to set the temperature process so that the nucleus of 
+#   the desired crystal (in this case, FCC Al) remains as small as possible.
+#-----------------------------------------------------------------------------------------
+clear
+echo both
+#-------------------- Environment Settings -----------------------------------------------
+variable       Tm equal  273+529.0 # <= near the melting point (529)
+variable  Tdesird equal  273+170.0 # Desired Temperature [K]
+
+variable      cSi equal   0.005794 # Si concentration
+variable      cMg equal   0.001116 # Mg concentration
+variable      cCu equal   0.001174 # Cu concentration
+variable      cFe equal   0.003400 # Fe concentration
+
+#variable      cVa equal 0.00016 # vacancy concentration (e.g., 0.016%)
+
+# Note: 32 GB memory: 100 x 100 x 6, 90 x 90 x 8, 80 x 80 x 10
+variable      xha equal     100 # simulation size, x axis [Angstrom] (e.g., 50 - 1000)
+variable      yha equal     100 # simulation size, y axis [Angstrom] (e.g., 50 - 1000)
+variable      zha equal       6 # simulation size, z axis [Angstrom] (e.g.,  6 - 20)
+
+variable Nout     equal     100 # output (e.g., 10 - 1000)
+
+variable rseed    equal   12345 # random seed (Note: If you want different results, use different values.)
+
+#-------------------- Initialization -----------------------------------------------------
+units metal
+dimension 3
+boundary p p p
+
+#-------------------- Atom & Lattice description ----------------------------------------
+atom_style atomic
+
+#----------------------------------------------------------------------
+region box block 0 ${xha} 0 ${yha} 0 ${zha} units box
+create_box 5 box
+
+lattice fcc 4.04685 # Al FCC lattice constant [Angstrom]
+#-------------------------------------------------------
+region al2 block 0            $(v_xha*1/4) 0 ${yha} 0 ${zha} units box
+region al3 block $(v_xha*1/4) $(v_xha*2/4) 0 ${yha} 0 ${zha} units box
+region al4 block $(v_xha*2/4) $(v_xha*3/4) 0 ${yha} 0 ${zha} units box
+region al5 block $(v_xha*3/4) $(v_xha*4/4) 0 ${yha} 0 ${zha} units box
+
+create_atoms 1 region al2 units box
+create_atoms 1 region al3 units box
+create_atoms 1 region al4 units box
+create_atoms 1 region al5 units box
+
+# creating composition by using set command for Al-Si-Mg-Cu-Fe alloy
+#-------------------------------------------------------------------
+set region al2 type/ratio 2 ${cSi} ${rseed} # set Si (type = 2) concentration randomly
+#-------------------------------------------------------------------
+set region al3 type/ratio 3 ${cMg} ${rseed} # set Mg (type = 3) concentration randomly
+#-------------------------------------------------------------------
+set region al4 type/ratio 4 ${cCu} ${rseed} # set Cu (type = 4) concentration randomly
+#-------------------------------------------------------------------
+set region al5 type/ratio 5 ${cFe} ${rseed} # set Fe (type = 5) concentration randomly
+#-------------------------------------------------------------------
+
+# vacancy
+#delete_atoms random fraction ${cVa} yes all NULL ${rseed}
+#delete_atoms random count 1 yes all NULL ${rseed}
+
+mass 1 26.9815 # Al
+mass 2 28.086  # Si
+mass 3 24.305  # Mg
+mass 4 63.54   # Cu
+mass 5 55.847  # Fe
+
+#----------------------------------------------------------------------
+
+variable elem string "Al Si Mg Cu Fe"
+
+#-------------------- Force field --------------------------------------------------------
+pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
+#pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
+
+#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
+
+#-------------------- Swap atoms  --------------------------------------------------------
+group imp type 2 3 4 5
+variable nswap equal count(imp)
+fix f12 all atom/swap 1 1 ${rseed} ${Tm} ke no types 1 2
+fix f23 all atom/swap 1 1 ${rseed} ${Tm} ke no types 1 3
+fix f34 all atom/swap 1 1 ${rseed} ${Tm} ke no types 1 4
+fix f45 all atom/swap 1 1 ${rseed} ${Tm} ke no types 1 5
+run ${nswap}
+unfix f12
+unfix f23
+unfix f34
+unfix f45
+
+#-------------------- Energy Minimization ------------------------------------------------
+# 0 [K], structure optimization
+fix             emin all box/relax iso 1.0
+min_style       cg
+min_modify      dmax 0.2
+min_modify      line quadratic
+minimize        1.0e-6 1.0e-8 4000 10000
+unfix           emin
+
+#-------------------- Settings -----------------------------------------------------------
+reset_timestep 0
+
+timestep     0.002 # 2.0 [fs] (Recommend 0.1-3.5 [fs]), sets the timestep for subsequent simulations
+
+thermo       100
+thermo_style custom step temp pe etotal ke vol
+
+#------------------------------
+dump            d1 all cfg ${Nout} cfg/run.melt.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump_modify     d1 element ${elem}
+#------------------------------
+
+velocity all create 4.0 ${rseed} mom yes rot yes dist gaussian
+
+#-------------------- Run the simulation -------------------------------------------------
+# Heating
+#fix f1 all nvt temp 4.0 ${Tm} $(100*dt)
+fix f1 all npt temp 4.0 ${Tm} $(100*dt) iso 1.0 1.0 $(1000*dt)
+run 8000 # 16 [ps] (e.g., 16 - 100 [ps]) # <= run $(int(7000*exp(-640/670)/exp(-640/v_Tm)))
+unfix f1
+
+#-------------------- Run the simulation -------------------------------------------------
+# Annealing
+#fix f2 all nvt temp ${Tm} ${Tm} $(100*dt)
+fix f2 all npt temp ${Tm} ${Tm} $(100*dt) iso 1.0 1.0 $(1000*dt)
+run 3000 # 6 [ps] (e.g., 6 - 60 [ps]) # <= run $(int(3000*exp(-640/670)/exp(-640/v_Tm)))
+unfix f2
+
+#-------------------- Run the simulation -------------------------------------------------
+# Cooling
+#fix f3 all nvt temp ${Tm} ${Tdesird} $(100*dt)
+fix f3 all npt temp ${Tm} ${Tdesird} $(100*dt) iso 1.0 1.0 $(1000*dt)
+run 40000 # 80 [ps] (e.g., 60 - 800 [ps]) # <= run $(int(40000*exp(-640/670)/exp(-640/v_Tm)))
+unfix f3
+
+write_data data_after_step1.lammps
+
+#-------------------- End ----------------------------------------------------------------
