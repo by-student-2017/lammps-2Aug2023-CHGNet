@@ -6,9 +6,9 @@ Comments -- By STUDENT ---
 
 Linux (e.g., ubuntu): $HOME/lammps or ~/lammps
 
-C drive (windows): /mnt/c/lammps
+Windows WSL (C drive): /mnt/c/lammps
 
-D drive (windows): /mnt/d/lammps
+Windows WSL (D drive): /mnt/d/lammps
 
 ----- Note 1 -----
 
