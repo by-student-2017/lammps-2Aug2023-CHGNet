@@ -1,0 +1,208 @@
+LAMMPS (2 Aug 2023)
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+#-----------------------------------------------------------------------------------------
+# 4.2 Creation of Al-Si-Mg-Cu-Fe alloys
+#  Test: LAMMPS 64-bit 22Dec2022-MSMPI version
+#-----------------------------------------------------------------------------------------
+clear
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+echo both
+#-------------------- Environment Settings -----------------------------------------------
+variable  Tdesird equal  273+170.0 # Desired Temperature [K]
+
+variable      cSi equal   0.005794 # Si concentration
+variable      cMg equal   0.001116 # Mg concentration
+variable      cCu equal   0.001174 # Cu concentration
+variable      cFe equal   0.003400 # Fe concentration
+
+variable      cVa equal    0.00016 # vacancy concentration (e.g., 0.016%)
+
+# Note: 32 GB memory: 100 x 100 x 6, 90 x 90 x 8, 80 x 80 x 10
+variable      xha equal     100 # simulation size, x axis [Angstrom] (e.g., 50 - 1000)
+variable      yha equal     100 # simulation size, y axis [Angstrom] (e.g., 50 - 1000)
+variable      zha equal       6 # simulation size, z axis [Angstrom] (e.g.,  6 - 20)
+
+variable Nsteps   equal   20000 # The number of calculations (e.g., 1000 - 100000) (about 30 cycle/min)
+variable Nout     equal     200 # output (e.g., 10 - 1000)
+
+variable rseed    equal   12345 # random seed (Note: If you want different results, use different values.)
+
+#-------------------- Initialization -----------------------------------------------------
+units metal
+dimension 3
+boundary p p p
+
+#-------------------- Atom & Lattice description ----------------------------------------
+atom_style atomic
+
+#----------------------------------------------------------------------
+region box block 0 ${xha} 0 ${yha} 0 ${zha} units box
+region box block 0 100 0 ${yha} 0 ${zha} units box
+region box block 0 100 0 100 0 ${zha} units box
+region box block 0 100 0 100 0 6 units box
+create_box 5 box
+Created orthogonal box = (0 0 0) to (100 100 6)
+  1 by 1 by 1 MPI processor grid
+
+lattice fcc 4.04685 # Al FCC lattice constant [Angstrom]
+Lattice spacing in x,y,z = 4.04685 4.04685 4.04685
+#-------------------------------------------------------
+region al2 block 0            $(v_xha*1/4) 0 ${yha} 0 ${zha} units box
+region al2 block 0            25 0 ${yha} 0 ${zha} units box
+region al2 block 0            25 0 100 0 ${zha} units box
+region al2 block 0            25 0 100 0 6 units box
+region al3 block $(v_xha*1/4) $(v_xha*2/4) 0 ${yha} 0 ${zha} units box
+region al3 block 25 $(v_xha*2/4) 0 ${yha} 0 ${zha} units box
+region al3 block 25 50 0 ${yha} 0 ${zha} units box
+region al3 block 25 50 0 100 0 ${zha} units box
+region al3 block 25 50 0 100 0 6 units box
+region al4 block $(v_xha*2/4) $(v_xha*3/4) 0 ${yha} 0 ${zha} units box
+region al4 block 50 $(v_xha*3/4) 0 ${yha} 0 ${zha} units box
+region al4 block 50 75 0 ${yha} 0 ${zha} units box
+region al4 block 50 75 0 100 0 ${zha} units box
+region al4 block 50 75 0 100 0 6 units box
+region al5 block $(v_xha*3/4) $(v_xha*4/4) 0 ${yha} 0 ${zha} units box
+region al5 block 75 $(v_xha*4/4) 0 ${yha} 0 ${zha} units box
+region al5 block 75 100 0 ${yha} 0 ${zha} units box
+region al5 block 75 100 0 100 0 ${zha} units box
+region al5 block 75 100 0 100 0 6 units box
+
+create_atoms 1 region al2 units box
+Created 975 atoms
+  using box units in orthogonal box = (0 0 0) to (100 100 6)
+  create_atoms CPU = 0.000 seconds
+create_atoms 1 region al3 units box
+Created 900 atoms
+  using box units in orthogonal box = (0 0 0) to (100 100 6)
+  create_atoms CPU = 0.000 seconds
+create_atoms 1 region al4 units box
+Created 975 atoms
+  using box units in orthogonal box = (0 0 0) to (100 100 6)
+  create_atoms CPU = 0.000 seconds
+create_atoms 1 region al5 units box
+Created 900 atoms
+  using box units in orthogonal box = (0 0 0) to (100 100 6)
+  create_atoms CPU = 0.000 seconds
+
+# creating composition by using set command for Al-Si-Mg-Cu-Fe alloy
+#-------------------------------------------------------------------
+set region al2 type/ratio 2 ${cSi} ${rseed} # set Si (type = 2) concentration randomly
+set region al2 type/ratio 2 0.005794 ${rseed} 
+set region al2 type/ratio 2 0.005794 12345 
+Setting atom values ...
+  5 settings made for type/ratio
+#-------------------------------------------------------------------
+set region al3 type/ratio 3 ${cMg} ${rseed} # set Mg (type = 3) concentration randomly
+set region al3 type/ratio 3 0.001116 ${rseed} 
+set region al3 type/ratio 3 0.001116 12345 
+Setting atom values ...
+  1 settings made for type/ratio
+#-------------------------------------------------------------------
+set region al4 type/ratio 4 ${cCu} ${rseed} # set Cu (type = 4) concentration randomly
+set region al4 type/ratio 4 0.001174 ${rseed} 
+set region al4 type/ratio 4 0.001174 12345 
+Setting atom values ...
+  1 settings made for type/ratio
+#-------------------------------------------------------------------
+set region al5 type/ratio 5 ${cFe} ${rseed} # set Fe (type = 5) concentration randomly
+set region al5 type/ratio 5 0.0034 ${rseed} 
+set region al5 type/ratio 5 0.0034 12345 
+Setting atom values ...
+  3 settings made for type/ratio
+#-------------------------------------------------------------------
+
+# vacancy
+delete_atoms random fraction ${cVa} yes all NULL ${rseed}
+delete_atoms random fraction 0.00016 yes all NULL ${rseed}
+delete_atoms random fraction 0.00016 yes all NULL 12345
+Deleted 0 atoms, new total = 3750
+#delete_atoms random count 1 yes all NULL ${rseed}
+
+mass 1 26.9815 # Al
+mass 2 28.086  # Si
+mass 3 24.305  # Mg
+mass 4 63.54   # Cu
+mass 5 55.847  # Fe
+
+#----------------------------------------------------------------------
+
+variable elem string "Al Si Mg Cu Fe"
+
+#-------------------- Force field --------------------------------------------------------
+pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
+#pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
+
+#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES Al Si Mg Cu Fe 
+
+#-----------------------------------------------------------------------------------------
+
+#---------- output file settings --------------------------------------
+dump            d1 all cfg ${Nout} cfg/run.mc.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump            d1 all cfg 200 cfg/run.mc.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump_modify     d1 element ${elem}
+dump_modify     d1 element Al Si Mg Cu Fe
+#----------------------------------------------------------------------
+
+#----- the uniform-acceptance force-bias Monte Carlo (fbMC) simulations -----
+fix f0 all tfmc 0.1 ${Tdesird} ${rseed} com 1 1 1 rot
+fix f0 all tfmc 0.1 443 ${rseed} com 1 1 1 rot
+fix f0 all tfmc 0.1 443 12345 com 1 1 1 rot
+
+run ${Nsteps}
+run 20000
+No /omp style for force computation currently active
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 7
+  ghost atom cutoff = 7
+  binsize = 3.5, bins = 29 29 2
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair m3gnet, perpetual
+      attributes: full, newton on, omp
+      pair build: full/bin/atomonly/omp
+      stencil: full/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 7.333 | 7.333 | 7.333 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   0             -10129.665      0             -10129.665      221800.96    
+     20000   0             -13574.564      0             -13574.564      78694.128    
+Loop time of 38899.8 on 1 procs for 20000 steps with 3750 atoms
+
+Performance: 0.044 ns/day, 540.276 hours/ns, 0.514 timesteps/s, 1.928 katom-step/s
+619.7% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 38877      | 38877      | 38877      |   0.0 | 99.94
+Neigh   | 1.3859     | 1.3859     | 1.3859     |   0.0 |  0.00
+Comm    | 1.2289     | 1.2289     | 1.2289     |   0.0 |  0.00
+Output  | 1.5007     | 1.5007     | 1.5007     |   0.0 |  0.00
+Modify  | 18.531     | 18.531     | 18.531     |   0.0 |  0.05
+Other   |            | 0.1962     |            |       |  0.00
+
+Nlocal:           3750 ave        3750 max        3750 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:          12531 ave       12531 max       12531 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:       318288 ave      318288 max      318288 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 318288
+Ave neighs/atom = 84.8768
+Neighbor list builds = 190
+Dangerous builds = 0
+
+write_data data_after_step1.lammps
+System init for write_data ...
+No /omp style for force computation currently active
+
+#-------------------- End ----------------------------------------------------------------
+Total wall time: 10:48:27
