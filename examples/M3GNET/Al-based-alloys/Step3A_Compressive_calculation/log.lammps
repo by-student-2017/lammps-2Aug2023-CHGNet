@@ -1,0 +1,193 @@
+LAMMPS (2 Aug 2023)
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+#-----------------------------------------------------------------------------------------
+# 4.2 Creation of Al-Si-Mg-Cu-Fe alloys
+#  Test: LAMMPS 64-bit 22Dec2022-MSMPI version
+# Input file for uniaxial compressive loading of Al-Si-Mg-Cu-Fe alloys
+#-----------------------------------------------------------------------------------------
+clear
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+echo both
+#-------------------- Environment Settings -----------------------------------------------
+variable  Tdesird equal  273+170.0 # Desired Temperature [K]
+
+variable  dt_ps   equal   0.001 # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+
+variable Nsteps   equal    2000 # The number of calculations
+variable Nout     equal     100 # output (e.g., 10 - 1000)
+
+variable rseed    equal   12345 # random seed (Note: If you want different results, use different values.)
+
+#-------------------- Initialization -----------------------------------------------------
+units metal
+dimension 3
+boundary p p p
+
+#-------------------- Atom & Lattice description ----------------------------------------
+atom_style atomic
+
+read_data data_after_step2.lammps
+Reading data file ...
+  orthogonal box = (-1.9600738 -1.9600738 -0.11760443) to (101.96007 101.96007 6.1176044)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  3750 atoms
+  reading velocities ...
+  3750 velocities
+  read_data CPU = 0.119 seconds
+
+variable elem string "Al Si Mg Cu Fe"
+
+#-------------------- Force field --------------------------------------------------------
+pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
+#pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
+
+#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES Al Si Mg Cu Fe 
+
+#-----------------------------------------------------------------------------------------
+
+#-------------------- Settings -----------------------------------------------------------
+timestep ${dt_ps}
+timestep 0.001
+
+velocity all create ${Tdesird} ${rseed} mom yes rot no # sets the velocity of a group of atoms
+velocity all create 443 ${rseed} mom yes rot no 
+velocity all create 443 12345 mom yes rot no 
+
+#-------------------- Equilibration ------------------------------------------------------
+# This calculation is done to eliminate residual stresses.
+
+thermo ${Nout}
+thermo 100
+thermo_style custom step lx ly lz press pxx pyy pzz pe temp fmax fnorm
+
+#-------------------- Defromation settings -----------------------------------------------
+reset_timestep 0
+
+compute csym all centro/atom fcc
+#compute peratom all pe/atom
+
+# Store final cell length for strain calculations
+variable tmp equal "lx"
+variable L0 equal ${tmp}
+variable L0 equal 103.920147656492
+print "Initial Length, L0: ${L0}"
+Initial Length, L0: 103.920147656492
+
+variable srate equal 1.0e11
+variable srate1 equal "-v_srate / 1.0e12"
+
+# Output strain and stress info to file
+# for units metal, pressure is in [bars] = 100 [kPa] = 1/10000 [GPa]
+# p2, p3, p4 are in GPa
+variable strain equal "(lx - v_L0)/v_L0"
+variable p1 equal "v_strain"
+variable p2 equal "-pxx/10000"
+variable p3 equal "-pyy/10000"
+variable p4 equal "-pzz/10000"
+fix def1 all print ${Nout} "${p1} ${p2} ${p3} ${p4}" file AlSiMgCuFe_comp.txt screen no
+fix def1 all print 100 "${p1} ${p2} ${p3} ${p4}" file AlSiMgCuFe_comp.txt screen no
+
+thermo ${Nout}
+thermo 100
+thermo_style custom step v_strain temp v_p2 v_p3 v_p4 ke pe press
+
+#---------- output file settings --------------------------------------
+dump         d2 all cfg ${Nout} cfg/run.comp.*.cfg mass type xs ys zs c_csym id type vx vy vz fx fy fz
+dump         d2 all cfg 100 cfg/run.comp.*.cfg mass type xs ys zs c_csym id type vx vy vz fx fy fz
+dump_modify  d2 element ${elem}
+dump_modify  d2 element Al Si Mg Cu Fe
+#----------------------------------------------------------------------
+
+#-------------------- Run the simulation -------------------------------------------------
+fix f2 all npt temp ${Tdesird} ${Tdesird} $(1000*dt) y 1.0 1.0 $(1000*dt) z 1.0 1.0 $(1000*dt) drag 1
+fix f2 all npt temp 443 ${Tdesird} $(1000*dt) y 1.0 1.0 $(1000*dt) z 1.0 1.0 $(1000*dt) drag 1
+fix f2 all npt temp 443 443 $(1000*dt) y 1.0 1.0 $(1000*dt) z 1.0 1.0 $(1000*dt) drag 1
+fix f2 all npt temp 443 443 1 y 1.0 1.0 $(1000*dt) z 1.0 1.0 $(1000*dt) drag 1
+fix f2 all npt temp 443 443 1 y 1.0 1.0 1 z 1.0 1.0 $(1000*dt) drag 1
+fix f2 all npt temp 443 443 1 y 1.0 1.0 1 z 1.0 1.0 1 drag 1
+fix f3 all deform 1 x erate ${srate1} units box remap x
+fix f3 all deform 1 x erate -0.1 units box remap x
+
+run ${Nsteps}
+run 2000
+No /omp style for force computation currently active
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 7
+  ghost atom cutoff = 7
+  binsize = 3.5, bins = 30 30 2
+  2 neighbor lists, perpetual/occasional/extra = 1 1 0
+  (1) pair m3gnet, perpetual
+      attributes: full, newton on, omp
+      pair build: full/bin/atomonly/omp
+      stencil: full/bin/3d
+      bin: standard
+  (2) compute centro/atom, occasional, copy from (1)
+      attributes: full, newton on, omp
+      pair build: copy
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 4.657 | 4.657 | 4.657 Mbytes
+   Step        v_strain         Temp           v_p2           v_p3           v_p4          KinEng         PotEng         Press     
+         0  -2.7349566e-15  443            0.11395386     0.11629944    -0.177074       214.67615     -13609.842     -177.26433    
+       100  -0.01           454.71623     -0.45822747     0.0078480194  -0.4223332      220.3538      -13616.398      2909.0422    
+       200  -0.02           436.83545     -0.44825595     0.10286376    -0.21880518     211.68884     -13608.957      1880.6579    
+       300  -0.03           446.58037     -0.6302816      0.078803019   -0.22367121     216.41119     -13613.83       2583.8326    
+       400  -0.04           452.59993     -0.84224731    -0.052242193   -0.3414599      219.32824     -13616.129      4119.8313    
+       500  -0.05           446.35308     -0.9375641     -0.093755531   -0.19662414     216.30104     -13611.963      4093.1459    
+       600  -0.06           453.68972     -0.87945714     0.058786727   -0.18374844     219.85635     -13613.938      3348.0628    
+       700  -0.07           450.80733     -1.0146621     -0.10682165    -0.25495283     218.45956     -13610.639      4588.1221    
+       800  -0.08           444.74274     -1.0535186     -0.18935315    -0.19141902     215.52068     -13605.652      4780.9693    
+       900  -0.09           455.77654     -0.976         -0.039251301   -0.11989196     220.86762     -13608.802      3783.8109    
+      1000  -0.1            446.62856     -1.0207045     -0.22950945    -0.22704378     216.43454     -13602.111      4924.1924    
+      1100  -0.11           441.75289     -0.99915352    -0.13433985    -0.16067047     214.07181     -13597.859      4313.8795    
+      1200  -0.12           443.30578     -0.98994589    -0.14590825    -0.15440454     214.82433     -13596.395      4300.8622    
+      1300  -0.13           442.93893     -0.96746364    -0.19441323    -0.18969253     214.64656     -13594.063      4505.2313    
+      1400  -0.14           440.21996     -1.0670667     -0.092430567   -0.16410026     213.32896     -13590.492      4411.9918    
+      1500  -0.15           440.74114     -0.88920087    -0.16814686    -0.21373577     213.58152     -13588.666      4236.945     
+      1600  -0.16           445.02843     -0.80315358    -0.094927253   -0.15884777     215.65912     -13589.419      3523.0953    
+      1700  -0.17           447.66773     -0.83562328    -0.22294796    -0.15277997     216.93812     -13588.632      4037.8373    
+      1800  -0.18           439.73907     -0.89796386    -0.22374135    -0.16855848     213.09592     -13582.996      4300.879     
+      1900  -0.19           446.25227     -0.81637284    -0.1223547     -0.050836748    216.25219     -13584.619      3298.5476    
+      2000  -0.2            449.1864      -0.86659415    -0.1174703     -0.17061882     217.67406     -13584.185      3848.9442    
+Loop time of 3048.29 on 1 procs for 2000 steps with 3750 atoms
+
+Performance: 0.057 ns/day, 423.373 hours/ns, 0.656 timesteps/s, 2.460 katom-step/s
+657.6% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 3047.2     | 3047.2     | 3047.2     |   0.0 | 99.97
+Neigh   | 0.30918    | 0.30918    | 0.30918    |   0.0 |  0.01
+Comm    | 0.10909    | 0.10909    | 0.10909    |   0.0 |  0.00
+Output  | 0.38525    | 0.38525    | 0.38525    |   0.0 |  0.01
+Modify  | 0.23791    | 0.23791    | 0.23791    |   0.0 |  0.01
+Other   |            | 0.02162    |            |       |  0.00
+
+Nlocal:           3750 ave        3750 max        3750 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:          10653 ave       10653 max       10653 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:       282238 ave      282238 max      282238 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 282238
+Ave neighs/atom = 75.263467
+Neighbor list builds = 45
+Dangerous builds = 0
+
+write_data data_after_step3.lammps
+System init for write_data ...
+No /omp style for force computation currently active
+
+#-------------------- End ----------------------------------------------------------------
+Total wall time: 0:50:55
