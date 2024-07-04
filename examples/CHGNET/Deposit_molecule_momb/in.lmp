@@ -15,7 +15,7 @@ variable Nout    equal     100 # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 lattice         fcc 3.818
-region          box block 0 5 0 5 0 10
+region          box block 0 5 0 5 0 15
 create_box      3 box # <= 3 types for "elem"
 
 region          substrate block INF INF INF INF INF 3
