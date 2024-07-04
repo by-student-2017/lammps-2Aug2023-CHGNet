@@ -23,9 +23,11 @@ create_atoms    1 region substrate
 
 mass 1 101.07 # Ru
 mass 2 12.01  # C
-mass 3 14.01  # N
+mass 3 12.01  # C
+#mass 3 14.01  # N
 
-variable elem string "Ru C N"
+variable elem string "Ru C C"
+#variable elem string "Ru C N"
 
 #-------------------- Force field --------------------------------------------------------
 # CPU case
@@ -44,9 +46,13 @@ variable R0_1 equal 1.639 # Angstrom
 variable C6_2 equal 1.75  # Jnm6mol-1
 variable R0_2 equal 1.452 # Angstrom
 
+# atom type 3, C
+variable C6_3 equal 1.75  # Jnm6mol-1
+variable R0_3 equal 1.452 # Angstrom
+
 # atom type 3, N
-variable C6_3 equal 1.23  # Jnm6mol-1
-variable R0_3 equal 1.397 # Angstrom
+#variable C6_3 equal 1.23  # Jnm6mol-1
+#variable R0_3 equal 1.397 # Angstrom
 
 # convert [Jnm6mol-1] to [eVA6], (sqrt() or ()^0.5)
 #----------------------------------------------------------------------------------
@@ -91,7 +97,7 @@ fix f2 mobile langevin ${Tini} ${Tfin} $(100*dt) 1234567
 fix f3 mobile nve
 
 fix  f4 addatoms deposit 100 0 100 12345 region slab near 1.0 &
-                mol molecule vz -1.0 -1.0
+                mol molecule vz -2.0 -2.0
 
 #fix  f5 addatoms wall/reflect zhi EDGE # <= boundary p p f
 
