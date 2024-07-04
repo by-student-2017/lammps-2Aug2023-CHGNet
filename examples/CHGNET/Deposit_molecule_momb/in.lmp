@@ -10,12 +10,12 @@ boundary        p p p   # original is "boundary p p f"
 variable   Tini  equal 273+25  # [K] (Initial temperature)
 variable   Tfin  equal 273+900 # [K] (Annealing temperature)
 
-variable Nsteps  equal   10000 # The number of calculations
+variable Nsteps  equal  100000 # The number of calculations
 variable Nout    equal     100 # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
 lattice         fcc 3.818
-region          box block 0 5 0 5 0 15
+region          box block 0 5 0 5 0 25
 create_box      3 box # <= 3 types for "elem"
 
 region          substrate block INF INF INF INF INF 3
@@ -74,7 +74,7 @@ region   mobile block 0 5 0 5 2 INF
 group    mobile region mobile
 
 molecule        molecule molecule.txt
-region          slab block 0 5 0 5 8 9
+region          slab block 0 5 0 5 18 19
 
 timestep 0.001 # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
 
