@@ -4,7 +4,7 @@ Comments -- By STUDENT ---
 
 ----- lammps -----
 
-ubuntu: $HOME/lammps or ~/lammps
+Linux (e.g., ubuntu): $HOME/lammps or ~/lammps
 
 C drive (windows): /mnt/c/lammps
 
