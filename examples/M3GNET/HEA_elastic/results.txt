@@ -1,0 +1,80 @@
+ 
+C tensor [GPa] (elastic stiffness constants)
+          1                 2                 3                 4                 5                 6        
+1       -430.3455         700.23531         49.829479         162.30157         343.50154         681.91806   
+2       700.23531         204.56313         457.04838         138.47276         270.82113        -539.60453   
+3       49.829479         457.04838        -174.04555         38.521361         660.28903        -115.25302   
+4       162.30157         138.47276         38.521361        -285.28643         2.3879109          29.79487   
+5       343.50154         270.82113         660.28903         2.3879109         103.63384         8.4713095   
+6       681.91806        -539.60453        -115.25302          29.79487         8.4713095        -848.93399   
+ 
+S tensor [1/GPa] (elastic compliance constants)
+          1                 2                 3                 4                 5                 6        
+1    0.0047324159    -0.00082460817     -0.0022406533      0.0012424896     0.00015096374      0.0023599724   
+2  -0.00082460817      0.0047520149    -0.00082857383     0.00065923445     -0.0020723818     -0.0017827395   
+3   -0.0022406533    -0.00082857383      0.0011532464    -0.00082697614      0.0012010417    -0.00073190931   
+4    0.0012424896     0.00065923445    -0.00082697614    -0.00038690446    -0.00030402885     0.00032903333   
+5   0.00015096374     -0.0020723818      0.0012010417    -0.00030402885     0.00099877074     0.00063702988   
+6    0.0023599724     -0.0017827395    -0.00073190931     0.00032903333     0.00063702988      0.0012875188   
+ 
+Ref: F. M. Gao and L. H. Gao, Journal of Superhard Materials, 2010, Vol. 32, No. 3, pp. 148-166.
+ 
+Voigt bulk modulus, BV:       223.82205 
+Reuss bulk modulus, BR:       350.87637 
+Hill bulk modulus, B=(BV+BR)/2:       287.34921 [GPa]
+ 
+Voigt shear modulus, GV:      -519.36404 
+Reuss shear modulus, GR:       235.02055 
+Hill shear modulus, G=(GV+GR)/2:      -142.17174 [GPa]
+ 
+Pughs modulus ratio, k=G/B:     -0.49476992
+ 
+Voigt
+Vickers hardnesses (Tian  model, 2012):             nan [GPa]
+Vickers hardnesses (Chen  model, 2011):             nan [GPa]
+Vickers hardnesses (Teter model, 1998):       -78.42397 [GPa]
+ 
+Reuss
+Vickers hardnesses (Tian  model, 2012):        27.83799 [GPa]
+Vickers hardnesses (Chen  model, 2011):       27.513388 [GPa]
+Vickers hardnesses (Teter model, 1998):       35.488104 [GPa]
+ 
+Hill
+Vickers hardnesses (Tian  model, 2012):             nan [GPa]
+Vickers hardnesses (Chen  model, 2011):             nan [GPa]
+Vickers hardnesses (Teter model, 1998):      -21.467933 [GPa]
+ 
+Note (VASP case)
+Hill = Voigt-Reuss-Hill (VRH) Approximation (averages)
+covalent and ionic crystals: Root Mean Square Error (RMSE) of HvChen = 4.4
+covalent and ionic crystals: Mean Absolute Error (MAE) of HvChen = 2.1
+bulk metallic glasses: Root Mean Square Error (RMSE) of HvChen = 0.9
+bulk metallic glasses: Mean Absolute Error (MAE) of HvChen = 0.8
+
+Attention
+  These expressions are optimized for first-principles calculations,
+the closer the potential is to the first-principles calculation (VASP, etc), 
+the closer to the above range of errors (Note (VASP case)).
+
+Note
+  Depending on the potential used, 
+these results can be evaluated qualitatively or semi-quantitatively for experimental results.
+
+Advanced information No.1
+  The prediction accuracy is improved by developing a potential that 
+gives results close to the first-principles calculation or calculating it using 
+Neural Network Molecular Dynamics (NNMD).
+
+Advanced information No.2
+  In an environment where VASP cannot be used or in a system where the calculation cost is 
+too high for first-principles calculation, someone has to develop the potential for Lammps.
+  I can't develop because I don't have research funds and post.
+  I hope someone will develop and publish EAM, MEAM, ADP, ReaxFF, NNMD, etc. for all element combinations. 
+  I can't do it anymore. Old soldiers like me who are close to the slave class just disappear.
+  Glory to young people living in the future !
+
+  There's no living with a killing (= no research funds and no post).
+  A beautiful world bids farewell and rides off into the valley of death,
+ignoring i desperate cries of "A true beautiful world, come back !"
+  Goodbye, a true beautiful world !
+  And then there were none.
