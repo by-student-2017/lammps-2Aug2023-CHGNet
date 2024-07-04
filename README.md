@@ -31,9 +31,18 @@ I've managed to assign the magnetic moment value from CHGNet to the q part where
 
 Or you could use "chgnet_driver.py" and put the charges into magmoms, if there is code in python or other languages ​​that predicts the charges from the structure, magnetic moments, etc.
 
+----- Note -----
+
+sudo apt-get update
+
+sudo apt -y install intel-mkl
+
 make msmpi_mkl_m3gnet
+
 make msmpi_mkl_oc20
+
 make openmpi_mkl_m3gnet
+
 make openmpi_mkl_oc20
 
 Failed：Born matrix: make yes-EXTRA-COMPUTE, make yes-python
