@@ -4,9 +4,9 @@ Comments -- By STUDENT ---
 
 ----- lammps -----
 
-Linux (e.g., ubuntu): $HOME/lammps or ~/lammps
+Linux (e.g., ubuntu): $HOME/lammps or ~/lammps, "/mnt/d" => $HOME or ~
 
-Windows WSL (C drive): /mnt/c/lammps
+Windows WSL (C drive): /mnt/c/lammps, "/mnt/d" => "/mnt/c"
 
 Windows WSL (D drive): /mnt/d/lammps
 
