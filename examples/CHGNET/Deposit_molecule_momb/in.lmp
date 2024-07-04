@@ -22,7 +22,7 @@ create_atoms    1 region substrate
 
 mass 1 63.55 # Cu
 mass 2 12.01 # C
-mass 2 14.01 # N
+mass 3 14.01 # N
 
 variable elem string "Cu C N"
 
