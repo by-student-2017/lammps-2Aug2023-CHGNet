@@ -1,0 +1,13 @@
+# dimer molecule
+
+2 atoms
+
+Coords
+
+1 0   0 0
+2 1.4 0 0
+
+Types
+
+1 2
+2 3
