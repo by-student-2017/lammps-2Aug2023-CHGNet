@@ -1,0 +1,31 @@
+# Solvated 5-mer peptide
+
+units		metal
+atom_style	full
+
+read_data	data.peptide
+
+#-------------------- Force field --------------------------------------------------------
+pair_style    chgnet /mnt/d/lammps/potentials/CHGNET
+#pair_style    chgnet/gpu /mnt/d/lammps/potentials/CHGNET
+
+pair_coeff    * *  0.3.0 C C O H N C C C O H H S O H
+
+
+neighbor	2.0 bin
+neigh_modify	delay 5
+
+timestep	$(2.0/1000) # 2.0 [fs]
+
+thermo_style	multi
+thermo		50
+
+fix		1 all nvt temp 275.0 275.0 100.0 tchain 1
+
+group		peptide type <= 12
+
+dump            d1 all cfg 25 cfg/run.*.cfg mass type xs ys zs id type q
+dump_modify     d1 element C C O H N C C C O H H S OH HH # OH and HH for H2O
+
+run		1000
+
