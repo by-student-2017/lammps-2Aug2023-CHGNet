@@ -1,0 +1,205 @@
+LAMMPS (2 Aug 2023)
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+#-----------------------------------------------------------------------------------------
+# 4.2 Creation of Al-Si-Mg-Cu-Fe alloys
+#  Test: LAMMPS 64-bit 22Dec2022-MSMPI version
+#-----------------------------------------------------------------------------------------
+clear
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+echo both
+#-------------------- Environment Settings -----------------------------------------------
+variable  Tdesird equal  273+170.0 # Desired Temperature [K]
+
+variable  dt_ps   equal   0.003 # 3.0 [fs] (Recommend 0.1-3.5 [fs]), sets the timestep for subsequent simulations
+
+variable Nsteps   equal    2000 # The number of calculations (e.g., 1000 - 100000)
+variable Nout     equal     100 # output (e.g., 10 - 1000)
+
+variable rseed    equal   12345 # random seed (Note: If you want different results, use different values.)
+
+#-------------------- Initialization -----------------------------------------------------
+units metal
+dimension 3
+boundary p p p
+
+#-------------------- Atom & Lattice description ----------------------------------------
+atom_style atomic
+
+read_data data_after_step2.lammps
+Reading data file ...
+  orthogonal box = (-1.9600738 -1.9600738 -0.11760443) to (101.96007 101.96007 6.1176044)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  3750 atoms
+  reading velocities ...
+  3750 velocities
+  read_data CPU = 0.077 seconds
+
+variable elem string "Al Si Mg Cu Fe"
+
+#-------------------- Force field --------------------------------------------------------
+pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
+#pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
+
+#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES Al Si Mg Cu Fe 
+
+#-----------------------------------------------------------------------------------------
+
+#-------------------- Settings -----------------------------------------------------------
+timestep ${dt_ps}
+timestep 0.003
+
+thermo ${Nout}   # computes and prints thermodynamic
+thermo 100   
+thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
+
+velocity all create ${Tdesird} ${rseed} mom yes rot no # sets the velocity of a group of atoms
+velocity all create 443 ${rseed} mom yes rot no 
+velocity all create 443 12345 mom yes rot no 
+
+#---------- output file settings --------------------------------------
+dump            d1 all cfg ${Nout} cfg/run.mc.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump            d1 all cfg 100 cfg/run.mc.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump_modify     d1 element ${elem}
+dump_modify     d1 element Al Si Mg Cu Fe
+#----------------------------------------------------------------------
+
+#-------------------- Run the simulation -------------------------------------------------
+
+# ----- Radial Distribution Function -----
+#comm_modify     cutoff 14
+compute         distribution all rdf 240
+fix             f1 all ave/time 1 ${Nout} ${Nout} c_distribution[*] file AlSiMgCuFe_RDF.txt mode vector
+fix             f1 all ave/time 1 100 ${Nout} c_distribution[*] file AlSiMgCuFe_RDF.txt mode vector
+fix             f1 all ave/time 1 100 100 c_distribution[*] file AlSiMgCuFe_RDF.txt mode vector
+
+# ----- Mean Square Displacement -----
+group           Al type 1
+3740 atoms in group Al
+compute         Almsd Al msd
+fix             f2 all ave/time 1 ${Nout} ${Nout} c_Almsd[*] file out_Al_msd.txt
+fix             f2 all ave/time 1 100 ${Nout} c_Almsd[*] file out_Al_msd.txt
+fix             f2 all ave/time 1 100 100 c_Almsd[*] file out_Al_msd.txt
+# -----
+group           Si type 2
+5 atoms in group Si
+compute         Simsd Si msd
+fix             f3 all ave/time 1 ${Nout} ${Nout} c_Simsd[*] file out_Si_msd.txt
+fix             f3 all ave/time 1 100 ${Nout} c_Simsd[*] file out_Si_msd.txt
+fix             f3 all ave/time 1 100 100 c_Simsd[*] file out_Si_msd.txt
+# -----
+group           Mg type 3
+1 atoms in group Mg
+compute         Mgmsd Mg msd
+fix             f4 all ave/time 1 ${Nout} ${Nout} c_Mgmsd[*] file out_Mg_msd.txt
+fix             f4 all ave/time 1 100 ${Nout} c_Mgmsd[*] file out_Mg_msd.txt
+fix             f4 all ave/time 1 100 100 c_Mgmsd[*] file out_Mg_msd.txt
+# -----
+group           Cu type 4
+1 atoms in group Cu
+compute         Cumsd Cu msd
+fix             f5 all ave/time 1 ${Nout} ${Nout} c_Cumsd[*] file out_Cu_msd.txt
+fix             f5 all ave/time 1 100 ${Nout} c_Cumsd[*] file out_Cu_msd.txt
+fix             f5 all ave/time 1 100 100 c_Cumsd[*] file out_Cu_msd.txt
+# -----
+group           Fe type 5
+3 atoms in group Fe
+compute         Femsd Fe msd
+fix             f6 all ave/time 1 ${Nout} ${Nout} c_Femsd[*] file out_Fe_msd.txt
+fix             f6 all ave/time 1 100 ${Nout} c_Femsd[*] file out_Fe_msd.txt
+fix             f6 all ave/time 1 100 100 c_Femsd[*] file out_Fe_msd.txt
+# -----
+compute         allmsd all msd
+fix             f7 all ave/time 1 ${Nout} ${Nout} c_allmsd[*] file out_all_msd.txt
+fix             f7 all ave/time 1 100 ${Nout} c_allmsd[*] file out_all_msd.txt
+fix             f7 all ave/time 1 100 100 c_allmsd[*] file out_all_msd.txt
+
+#fix f8 all nvt temp ${Tdesird} ${Tdesird} $(100*dt)
+fix f8 all npt temp ${Tdesird} ${Tdesird} $(100*dt) iso 1.0 1.0 $(1000*dt)
+fix f8 all npt temp 443 ${Tdesird} $(100*dt) iso 1.0 1.0 $(1000*dt)
+fix f8 all npt temp 443 443 $(100*dt) iso 1.0 1.0 $(1000*dt)
+fix f8 all npt temp 443 443 0.2999999999999999889 iso 1.0 1.0 $(1000*dt)
+fix f8 all npt temp 443 443 0.2999999999999999889 iso 1.0 1.0 3
+
+run ${Nsteps}
+run 2000
+No /omp style for force computation currently active
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 7
+  ghost atom cutoff = 7
+  binsize = 3.5, bins = 30 30 2
+  2 neighbor lists, perpetual/occasional/extra = 1 1 0
+  (1) pair m3gnet, perpetual
+      attributes: full, newton on, omp
+      pair build: full/bin/atomonly/omp
+      stencil: full/bin/3d
+      bin: standard
+  (2) compute rdf, occasional, half/full from (1)
+      attributes: half, newton on, omp
+      pair build: halffull/newton/omp
+      stencil: none
+      bin: none
+Per MPI rank memory allocation (min/avg/max) = 7.539 | 7.539 | 7.539 Mbytes
+   Step          Temp          Volume         Press          TotEng    
+         0   443            67336.496     -177.26333     -13395.166    
+       100   442.96782      67369.283     -14.244841     -13393.831    
+       200   442.94639      67359.023      638.40975     -13388.096    
+       300   449.46012      67453.976      131.95338     -13384.264    
+       400   450.78793      67465.858     -802.41074     -13388.885    
+       500   442.19817      67199.7        1611.06       -13394.049    
+       600   446.46039      67405.297     -1685.7748     -13396.991    
+       700   437.99227      67351.122      15.022006     -13396.706    
+       800   454.40057      67182.775      917.75097     -13393.725    
+       900   448.90209      67524.355     -2675.3293     -13392.964    
+      1000   452.16872      67250.896      1012.3183     -13389.742    
+      1100   447.98963      67289.258      875.02752     -13391.097    
+      1200   436.24448      67490.851     -1688.271      -13397.345    
+      1300   442.75143      67072.294      2271.4721     -13398.048    
+      1400   438.94219      67299.7       -299.75866     -13399.699    
+      1500   437.38834      67341.811     -1004.5207     -13400.991    
+      1600   447.29127      67134.424      1583.0853     -13396.121    
+      1700   448.4617       67404.062     -1242.395      -13393.739    
+      1800   443.54213      67306.331      92.632646     -13394.624    
+      1900   440.11394      67155.179      957.57426     -13401.505    
+      2000   430.67723      67248.626      552.78835     -13404.408    
+Loop time of 3250.57 on 1 procs for 2000 steps with 3750 atoms
+
+Performance: 0.159 ns/day, 150.490 hours/ns, 0.615 timesteps/s, 2.307 katom-step/s
+629.7% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 3246.6     | 3246.6     | 3246.6     |   0.0 | 99.88
+Neigh   | 0.52781    | 0.52781    | 0.52781    |   0.0 |  0.02
+Comm    | 0.11793    | 0.11793    | 0.11793    |   0.0 |  0.00
+Output  | 0.25825    | 0.25825    | 0.25825    |   0.0 |  0.01
+Modify  | 3.0225     | 3.0225     | 3.0225     |   0.0 |  0.09
+Other   |            | 0.01996    |            |       |  0.00
+
+Nlocal:           3750 ave        3750 max        3750 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:          11896 ave       11896 max       11896 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         143906 ave      143906 max      143906 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:       287812 ave      287812 max      287812 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 287812
+Ave neighs/atom = 76.749867
+Neighbor list builds = 78
+Dangerous builds = 0
+
+write_data data_after_step3.lammps
+System init for write_data ...
+No /omp style for force computation currently active
+
+#-------------------- End ----------------------------------------------------------------
+Total wall time: 0:54:15
