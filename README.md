@@ -33,18 +33,6 @@ Or you could use "chgnet_driver.py" and put the charges into magmoms, if there i
 
 ----- Note -----
 
-sudo apt-get update
-
-sudo apt -y install intel-mkl
-
-make msmpi_mkl_m3gnet
-
-make msmpi_mkl_oc20
-
-make openmpi_mkl_m3gnet
-
-make openmpi_mkl_oc20
-
 Failed：Born matrix: make yes-EXTRA-COMPUTE, make yes-python
 
 ----- Problems solved after operation check -----
