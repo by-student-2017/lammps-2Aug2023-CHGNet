@@ -2,6 +2,16 @@ Customized LAMMPS(2Aug2023) for Neural Network Potential, by AdvanceSoft Corp. <
 
 Comments -- By STUDENT ---
 
+----- lammps -----
+
+ubuntu: $HOME/lammps or ~/lammps
+
+C drive (windows): /mnt/c/lammps
+
+D drive (windows): /mnt/d/lammps
+
+----- Note 1 -----
+
 If you want to calculate an interface with an applied electric field, we recommend that you use QEq to calculate with the original state (advancesoftcorp/lammps).
 
 Since the calculation of "d3" is very heavy, there is also a method to use momb(=-D2) implemented in Lammps. The parameters are described in the original paper. I prepared a folder named momb as a reference example. When used in conjunction with "QEq", "CHGNet" and "M3GNet" will enable a fairly wide range of calculations.
@@ -31,7 +41,7 @@ I've managed to assign the magnetic moment value from CHGNet to the q part where
 
 Or you could use "chgnet_driver.py" and put the charges into magmoms, if there is code in python or other languages ​​that predicts the charges from the structure, magnetic moments, etc.
 
------ Note -----
+----- Note 2 -----
 
 Failed：Born matrix: make yes-EXTRA-COMPUTE, make yes-python
 
