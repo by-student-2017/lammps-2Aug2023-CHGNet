@@ -4,7 +4,7 @@ NCPU=8
 lammps_adress=/mnt/d/lammps
 #lammps_adress=$HOME/lammps
 
-mkdir cfg
+#mkdir cfg
 
 export OMP_NUM_THREADS=${NCPU}
 
