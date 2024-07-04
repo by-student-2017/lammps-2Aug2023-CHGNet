@@ -1,58 +1,100 @@
-#-----------------------------------------------------------------------------------------
-# 4.2 Creation of Al-Si-Mg-Cu-Fe alloys
-#  Test: LAMMPS 64-bit 22Dec2022-MSMPI version
-#-----------------------------------------------------------------------------------------
-clear
-echo both
-#-------------------- Environment Settings -----------------------------------------------
-variable  Tdesird equal  273+170.0 # Desired Temperature [K]
-
-variable  Pdesird equal        1.0 # Desired Pressure [bar] (1 bar = 0.1 MPa = 100 kPa)
-
-variable  dt_ps   equal   0.003 # 3.0 [fs] (Recommend 0.1-3.5 [fs]), sets the timestep for subsequent simulations
-
-variable Nsteps   equal    1000 # The number of calculations (e.g., 1000 - 100000)
-variable Nout     equal     100 # output (e.g., 10 - 1000)
-
-variable rseed    equal   12345 # random seed (Note: If you want different results, use different values.)
-
+# sample surface deposition script for molecules
 #-------------------- Initialization -----------------------------------------------------
-units metal
-dimension 3
-boundary p p p
+clear
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file 
+atom_style      full
+boundary        p p p   # original is "boundary p p f"
+#-----------------------------------------------------------------------------------------
+variable   Tini  equal 273+25  # [K] (Initial temperature)
+variable   Tfin  equal 273+900 # [K] (Annealing temperature)
+
+variable Nsteps  equal   10000 # The number of calculations
+variable Nout    equal     100 # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
-atom_style atomic
+lattice         fcc 3.818
+region          box block 0 5 0 5 0 10
+create_box      3 box # <= 3 types for "elem"
 
-read_data data_after_step1.lammps
+region          substrate block INF INF INF INF INF 3
+create_atoms    1 region substrate
 
-variable elem string "Al Si Mg Cu Fe"
+mass 1 101.07 # Ru
+mass 2 12.01  # C
+mass 3 14.01  # N
+
+variable elem string "Ru C N"
 
 #-------------------- Force field --------------------------------------------------------
-pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
-#pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
+# CPU case
+#pair_style hybrid/overlay chgnet /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+#pair_coeff    * *  chgnet 0.3.0 ${elem}
 
-#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
-pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
+# GPU case
+pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+pair_coeff    * *  chgnet/gpu 0.3.0 ${elem}
+
+# atom type 1, Ru
+variable C6_1 equal 24.67 # Jnm6mol-1
+variable R0_1 equal 1.639 # Angstrom
+
+# atom type 2, C
+variable C6_2 equal 1.75  # Jnm6mol-1
+variable R0_2 equal 1.452 # Angstrom
+
+# atom type 3, N
+variable C6_3 equal 1.23  # Jnm6mol-1
+variable R0_3 equal 1.397 # Angstrom
+
+# convert [Jnm6mol-1] to [eVA6], (sqrt() or ()^0.5)
+#----------------------------------------------------------------------------------
+pair_coeff 1 1 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_1)*10.364) $(v_R0_1 + v_R0_1) # A-A
+pair_coeff 1 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_2)*10.364) $(v_R0_1 + v_R0_2) # A-C
+pair_coeff 1 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_3)*10.364) $(v_R0_1 + v_R0_3) # A-N
+#----------------------------------------------------------------------------------
+pair_coeff 2 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_2)*10.364) $(v_R0_2 + v_R0_2) # C-C
+pair_coeff 2 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_3)*10.364) $(v_R0_2 + v_R0_3) # C-N
+#----------------------------------------------------------------------------------
+pair_coeff 3 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_3)*10.364) $(v_R0_3 + v_R0_3) # N-N
+#----------------------------------------------------------------------------------
 
 #-------------------- Settings -----------------------------------------------------------
-timestep ${dt_ps}
+neigh_modify  delay 0
 
-thermo ${Nout}   # computes and prints thermodynamic 
-thermo_style custom step temp vol press etotal   # specifies content of thermodynamic data to be printed in screen
+group    addatoms type 2 3 # <= Types (2nd row) in molecule.txt
+region   mobile block 0 5 0 5 2 INF
+group    mobile region mobile
 
-velocity all create ${Tdesird} ${rseed} mom yes rot no # sets the velocity of a group of atoms
+molecule        molecule molecule.txt
+region          slab block 0 5 0 5 8 9
 
-#---------- output file settings --------------------------------------
-dump            d1 all cfg ${Nout} cfg/run.md.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+timestep 0.001 # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+
+compute  add addatoms temp
+compute_modify add dynamic/dof yes extra/dof 0
+
+thermo          ${Nout}
+thermo_style    custom step atoms temp epair etotal press
+thermo_modify   temp add lost/bond ignore lost warn
+
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
 dump_modify     d1 element ${elem}
-#----------------------------------------------------------------------
+
+#velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
 
 #-------------------- Run the simulation -------------------------------------------------
-fix f1 all npt temp ${Tdesird} ${Tdesird} $(100*dt) iso 1.0 ${Pdesird} $(1000*dt)
+# non-equilibrium system, calculation settings
+fix f1 addatoms nve
+fix f2 mobile langevin ${Tini} ${Tfin} $(100*dt) 1234567
+fix f3 mobile nve
+
+fix  f4 addatoms deposit 100 0 100 12345 region slab near 1.0 &
+                mol molecule vz -1.0 -1.0
+
+#fix  f5 addatoms wall/reflect zhi EDGE # <= boundary p p f
 
 run ${Nsteps}
-
-write_data data_after_step2.lammps
 
 #-------------------- End ----------------------------------------------------------------
