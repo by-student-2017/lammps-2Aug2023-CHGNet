@@ -7,14 +7,13 @@ lammps_adress=/mnt/d/lammps
 #mkdir cfg
 
 export OMP_NUM_THREADS=${NCPU}
-#export OMP_NUM_THREADS=1
 
 # non-OPENMP package installation case
-#${lammps_adress}/src/lmp_serial -in in.lmp
+#export OMP_NUM_THREADS=1
+#${lammps_adress}/src/lmp_serial -in in.elastic
 
 # OPENMP package installation case
 ${lammps_adress}/src/lmp_serial -sf omp -pk omp ${NCPU} -in in.elastic
-#${lammps_adress}/src/lmp_serial -in in.elastic
 
 python3 elastic.py > results.txt
 
