@@ -13,18 +13,18 @@ variable Tfin equal 273+900 # [K] (Annealing temperature)
 variable Nout equal  1000 # every 1000 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
-lattice         fcc 3.62
+lattice         fcc 3.818
 region          box block 0 5 0 5 0 10
 create_box      3 box # <= 3 types for "elem"
 
 region          substrate block INF INF INF INF INF 3
 create_atoms    1 region substrate
 
-mass 1 63.55 # Cu
-mass 2 12.01 # C
-mass 3 14.01 # N
+mass 1 101.07 # Ru
+mass 2 12.01  # C
+mass 3 14.01  # N
 
-variable elem string "Cu C N"
+variable elem string "Ru C N"
 
 #-------------------- Force field --------------------------------------------------------
 # CPU case
@@ -35,9 +35,9 @@ variable elem string "Cu C N"
 pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
 pair_coeff    * *  chgnet/gpu 0.3.0 ${elem}
 
-# atom type 1, Cu
-variable C6_1 equal 10.80 # Jnm6mol-1
-variable R0_1 equal 1.562 # Angstrom
+# atom type 1, Ru
+variable C6_1 equal 24.67 # Jnm6mol-1
+variable R0_1 equal 1.639 # Angstrom
 
 # atom type 2, C
 variable C6_2 equal 1.75  # Jnm6mol-1
