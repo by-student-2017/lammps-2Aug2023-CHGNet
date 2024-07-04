@@ -1,0 +1,26 @@
+# NOTE: This script can be modified for different pair styles 
+# See in.elastic for more info.
+
+reset_timestep 0
+
+variable elem string "Si"
+
+#-------------------- Force field --------------------------------------------------------
+pair_style      m3gnet /mnt/d/lammps/potentials/M3GNET
+#pair_style      m3gnet/d3 /mnt/d/lammps/potentials/M3GNET
+
+#pair_coeff      * *  MP-2021.2.8-EFS ${elem} # M3GNet <https://github.com/materialsvirtuallab/m3gnet> will be called
+pair_coeff      * *  M3GNet-MP-2021.2.8-PES ${elem} # MatGL <https://github.com/materialsvirtuallab/matgl> will be called
+
+# Setup neighbor style
+neighbor 1.0 nsq
+neigh_modify once no every 1 delay 0 check yes
+
+# Setup MD
+
+timestep ${timestep}
+fix 4 all nve
+if "${thermostat} == 1" then &
+   "fix 5 all langevin ${temp} ${temp} ${tdamp} ${seed}"
+
+
