@@ -97,7 +97,7 @@ fix f2 mobile langevin ${Tini} ${Tfin} $(100*dt) 1234567
 fix f3 mobile nve
 
 fix  f4 addatoms deposit 800 0 100 12345 region slab near 1.0 &
-                mol molecule vz -3.0 -3.0
+                mol molecule vz -5.0 -5.0
 
 #fix  f5 addatoms wall/reflect zhi EDGE # <= boundary p p f
 
