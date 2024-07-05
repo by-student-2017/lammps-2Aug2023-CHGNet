@@ -10,7 +10,7 @@ boundary        p p p   # original is "boundary p p f"
 variable   Tini  equal 273+25  # [K] (Initial temperature)
 variable   Tfin  equal 273+900 # [K] (Annealing temperature)
 
-variable Nsteps  equal   10000 # The number of calculations
+variable Nsteps  equal   50000 # The number of calculations (80 step/min)
 variable Nout    equal     100 # every 100 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
