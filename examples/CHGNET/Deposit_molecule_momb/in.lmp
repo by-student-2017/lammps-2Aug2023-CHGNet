@@ -7,7 +7,7 @@ units           metal   # determines units of all quantities used in the input f
 atom_style      full
 boundary        p p p   # original is "boundary p p f"
 #-----------------------------------------------------------------------------------------
-variable   Tini  equal 273+25  # [K] (Initial temperature)
+variable   Tini  equal 273+900 # [K] (Initial temperature)
 variable   Tfin  equal 273+900 # [K] (Annealing temperature)
 
 variable Nsteps  equal   50000 # The number of calculations (80 step/min)
@@ -96,7 +96,7 @@ fix f1 addatoms nve
 fix f2 mobile langevin ${Tini} ${Tfin} $(100*dt) 1234567
 fix f3 mobile nve
 
-fix  f4 addatoms deposit 10000 0 100 12345 region slab near 1.0 &
+fix  f4 addatoms deposit 800 0 100 12345 region slab near 1.0 &
                 mol molecule vz -3.0 -3.0
 
 #fix  f5 addatoms wall/reflect zhi EDGE # <= boundary p p f
