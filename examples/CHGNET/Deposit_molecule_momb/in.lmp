@@ -10,7 +10,7 @@ boundary        p p p   # original is "boundary p p f"
 variable   Tini  equal 273+1200 # [K] (Initial temperature)
 variable   Tfin  equal 273+1200 # [K] (Annealing temperature)
 
-variable Nsteps  equal   50000 # The number of calculations
+variable Nsteps  equal   40000 # The number of calculations
 variable Nout    equal    1000 # every 1000 time steps to the specified file
 
 #-------------------- Atom & Lattice description ----------------------------------------
@@ -96,7 +96,7 @@ fix f1 addatoms nve
 fix f2 mobile langevin ${Tini} ${Tfin} $(100*dt) 1234567
 fix f3 mobile nve
 
-fix  f4 addatoms deposit 500 0 100 12345 region slab near 1.0 &
+fix  f4 addatoms deposit 400 0 100 12345 region slab near 1.0 &
                 mol molecule vz -5.0 -5.0
 # Note: substrate 350 + molecule 700 = 1050 atoms: 21.4 GB
 
