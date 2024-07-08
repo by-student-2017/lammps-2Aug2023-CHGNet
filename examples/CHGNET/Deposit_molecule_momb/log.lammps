@@ -1,0 +1,242 @@
+LAMMPS (2 Aug 2023)
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+# sample surface deposition script for molecules
+#-------------------- Initialization -----------------------------------------------------
+clear
+package omp 8
+WARNING: OpenMP support not enabled during compilation; using 1 thread only. (../fix_omp.cpp:116)
+echo            both    # echoes each input script command to both log file and screen
+#-----------------------------------------------------------------------------------------
+units           metal   # determines units of all quantities used in the input file
+atom_style      full
+boundary        p p p   # original is "boundary p p f"
+#-----------------------------------------------------------------------------------------
+variable   Tini  equal 273+1200 # [K] (Initial temperature)
+variable   Tfin  equal 273+1200 # [K] (Annealing temperature)
+
+variable Nsteps  equal   20000 # The number of calculations
+variable Nout    equal    1000 # every 1000 time steps to the specified file
+
+#-------------------- Atom & Lattice description ----------------------------------------
+lattice         fcc 3.818
+Lattice spacing in x,y,z = 3.818 3.818 3.818
+region          box block 0 5 0 5 0 20
+create_box      3 box # <= 3 types for "elem"
+Created orthogonal box = (0 0 0) to (19.09 19.09 76.36)
+  1 by 1 by 1 MPI processor grid
+
+region          substrate block INF INF INF INF INF 3
+create_atoms    1 region substrate
+Created 350 atoms
+  using lattice units in orthogonal box = (0 0 0) to (19.09 19.09 76.36)
+  create_atoms CPU = 0.001 seconds
+
+mass 1 101.07 # Ru
+mass 2 12.01  # C
+mass 3 12.01  # C
+#mass 3 14.01  # N
+
+variable elem string "Ru C C"
+#variable elem string "Ru C N"
+
+#-------------------- Force field --------------------------------------------------------
+# CPU case
+#pair_style hybrid/overlay chgnet /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+#pair_coeff    * *  chgnet 0.3.0 ${elem}
+
+# GPU case
+pair_style hybrid/overlay chgnet/gpu /mnt/d/lammps/potentials/CHGNET momb 12.0 0.75 20.0
+pair_coeff    * *  chgnet/gpu 0.3.0 ${elem}
+pair_coeff    * *  chgnet/gpu 0.3.0 Ru C C
+
+# atom type 1, A <- Ru
+variable C6_1 equal 24.67 # Jnm6mol-1
+variable R0_1 equal 1.639 # Angstrom
+
+# atom type 2, B <- C
+variable C6_2 equal 1.75  # Jnm6mol-1
+variable R0_2 equal 1.452 # Angstrom
+
+# atom type 3, C <- C
+variable C6_3 equal 1.75  # Jnm6mol-1
+variable R0_3 equal 1.452 # Angstrom
+
+# atom type 3, N
+#variable C6_3 equal 1.23  # Jnm6mol-1
+#variable R0_3 equal 1.397 # Angstrom
+
+# convert [Jnm6mol-1] to [eVA6], (sqrt() or ()^0.5)
+#----------------------------------------------------------------------------------
+pair_coeff 1 1 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_1)*10.364) $(v_R0_1 + v_R0_1) # A-A
+pair_coeff 1 1 momb 0.0 1.0 1.0 255.67988000000002557 $(v_R0_1 + v_R0_1) 
+pair_coeff 1 1 momb 0.0 1.0 1.0 255.67988000000002557 3.2780000000000000249 
+pair_coeff 1 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_2)*10.364) $(v_R0_1 + v_R0_2) # A-B
+pair_coeff 1 2 momb 0.0 1.0 1.0 68.097474134948654978 $(v_R0_1 + v_R0_2) 
+pair_coeff 1 2 momb 0.0 1.0 1.0 68.097474134948654978 3.0910000000000001918 
+pair_coeff 1 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_1 * v_C6_3)*10.364) $(v_R0_1 + v_R0_3) # B-C
+pair_coeff 1 3 momb 0.0 1.0 1.0 68.097474134948654978 $(v_R0_1 + v_R0_3) 
+pair_coeff 1 3 momb 0.0 1.0 1.0 68.097474134948654978 3.0910000000000001918 
+#----------------------------------------------------------------------------------
+pair_coeff 2 2 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_2)*10.364) $(v_R0_2 + v_R0_2) # B-B
+pair_coeff 2 2 momb 0.0 1.0 1.0 18.137000000000000455 $(v_R0_2 + v_R0_2) 
+pair_coeff 2 2 momb 0.0 1.0 1.0 18.137000000000000455 2.9039999999999999147 
+pair_coeff 2 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_2 * v_C6_3)*10.364) $(v_R0_2 + v_R0_3) # B-C
+pair_coeff 2 3 momb 0.0 1.0 1.0 18.137000000000000455 $(v_R0_2 + v_R0_3) 
+pair_coeff 2 3 momb 0.0 1.0 1.0 18.137000000000000455 2.9039999999999999147 
+#----------------------------------------------------------------------------------
+pair_coeff 3 3 momb 0.0 1.0 1.0 $(sqrt(v_C6_3 * v_C6_3)*10.364) $(v_R0_3 + v_R0_3) # C-C
+pair_coeff 3 3 momb 0.0 1.0 1.0 18.137000000000000455 $(v_R0_3 + v_R0_3) 
+pair_coeff 3 3 momb 0.0 1.0 1.0 18.137000000000000455 2.9039999999999999147 
+#----------------------------------------------------------------------------------
+
+#-------------------- Settings -----------------------------------------------------------
+neigh_modify  delay 0
+
+group    addatoms type 2 3 # <= Types (2nd row) in molecule.txt
+0 atoms in group addatoms
+region   mobile block 0 5 0 5 2 INF
+group    mobile region mobile
+150 atoms in group mobile
+
+molecule        molecule molecule.txt
+Read molecule template molecule:
+  1 molecules
+  0 fragments
+  2 atoms with max type 3
+  0 bonds with max type 0
+  0 angles with max type 0
+  0 dihedrals with max type 0
+  0 impropers with max type 0
+region          slab block 0 5 0 5 13 14
+
+timestep 0.001 # 1.0 [fs] (Recommend 0.1-1.0 [fs]), sets the timestep for subsequent simulations
+
+compute  add addatoms temp
+compute_modify add dynamic/dof yes extra/dof 0
+
+thermo          ${Nout}
+thermo          1000
+thermo_style    custom step atoms temp epair etotal press
+thermo_modify   temp add lost/bond ignore lost warn
+WARNING: Temperature for thermo pressure is not for group all (../thermo.cpp:527)
+
+dump            d1 all cfg ${Nout} cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump            d1 all cfg 1000 cfg/run.*.cfg mass type xs ys zs id type vx vy vz fx fy fz
+dump_modify     d1 element ${elem}
+dump_modify     d1 element Ru C C
+
+#velocity all create ${Tini} 12345 mom yes rot no # sets the velocity of a group of atoms
+
+#-------------------- Run the simulation -------------------------------------------------
+# non-equilibrium system, calculation settings
+fix f1 addatoms nve
+fix f2 mobile langevin ${Tini} ${Tfin} $(100*dt) 1234567
+fix f2 mobile langevin 1473 ${Tfin} $(100*dt) 1234567
+fix f2 mobile langevin 1473 1473 $(100*dt) 1234567
+fix f2 mobile langevin 1473 1473 0.10000000000000000555 1234567
+fix f3 mobile nve
+
+fix  f4 addatoms deposit 200 0 100 12345 region slab near 1.0                 mol molecule vz -4.0 -4.0
+# Note: substrate 350 + molecule 700 = 1050 atoms: 21.4 GB
+
+#fix  f5 addatoms wall/reflect zhi EDGE # <= boundary p p f
+
+run ${Nsteps}
+run 20000
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+
+- Pair style momb: doi:10.1021/jp412098n
+
+@Article{pair_momb_2015,
+title = {A Force Field for Describing the Polyvinylpyrrolidone-Mediated
+    Solution-Phase Synthesis of Shape-Selective {Ag} Nanoparticles},
+volume = {118},
+number = {6},
+url = {https://doi.org/10.1021/jp412098n},
+doi = {10.1021/jp412098n},
+journal = {J.~Phys.\ Chem.~C},
+author = {Zhou, Ya and Wissam A. Saidi and Kristen A. Fichthorn},
+year = {2014},
+pages = {3366--3374}
+}
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+No /omp style for force computation currently active
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 14
+  ghost atom cutoff = 14
+  binsize = 7, bins = 3 3 11
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair chgnet/gpu, perpetual
+      attributes: full, newton on, omp, cut 8
+      pair build: full/bin/omp
+      stencil: full/bin/3d
+      bin: standard
+  (2) pair momb, perpetual
+      attributes: half, newton on, omp
+      pair build: half/bin/newton/omp
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 7.127 | 7.127 | 7.127 Mbytes
+   Step        Atoms         Temp          E_pair         TotEng         Press     
+         0         350   0             -3290.632      -3290.632      -23351.421    
+      1000         370   1475.9707     -3374.4549     -3370.6392     -15237.039    
+      2000         390   1410.714      -3480.1271     -3472.8331     -14327.8      
+      3000         410   2925.4504     -3635.2566     -3612.568      -15502.22     
+      4000         430   2845.3796     -3809.5882     -3780.1647     -11438.008    
+      5000         450   2064.9965     -3988.6682     -3961.976      -12262.714    
+      6000         470   2459.4832     -4162.2219     -4124.0724     -14560.975    
+      7000         490   2442.3449     -4317.3172     -4273.1195     -9955.0385    
+      8000         510   2448.0072     -4489.7395     -4439.1108     -9998.3868    
+      9000         530   2573.4346     -4656.3304     -4596.4548     -12655.312    
+     10000         550   2420.5367     -4818.3677     -4755.7919     -13141.359    
+     11000         570   2635.7814     -4996.6136     -4921.6593     -14151.807    
+     12000         590   2379.9001     -5151.3734     -5077.5431     -7085.7638    
+     13000         610   2449.3559     -5319.7153     -5237.3982     -11003.707    
+     14000         630   2324.3289     -5476.5393     -5392.4152     -6658.3166    
+     15000         650   2379.5922     -5648.6404     -5556.3645     -9503.3706    
+     16000         670   2391.7523     -5816.2787     -5717.3481     -9312.0941    
+     17000         690   2530.6362     -5989.7987     -5878.5812     -9890.8866    
+     18000         710   2556.4311     -6168.0816     -6049.1215     -7527.7372    
+     19000         730   2456.0264     -6331.0392     -6210.402      -10989.029    
+     20000         750   2672.8684     -6502.5768     -6364.3787     -7597.0985    
+Loop time of 7526.08 on 1 procs for 20000 steps with 750 atoms
+
+Performance: 0.230 ns/day, 104.529 hours/ns, 2.657 timesteps/s, 1.993 katom-step/s
+159.8% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 7521.9     | 7521.9     | 7521.9     |   0.0 | 99.94
+Bond    | 0.0036014  | 0.0036014  | 0.0036014  |   0.0 |  0.00
+Neigh   | 3.2807     | 3.2807     | 3.2807     |   0.0 |  0.04
+Comm    | 0.39349    | 0.39349    | 0.39349    |   0.0 |  0.01
+Output  | 0.16462    | 0.16462    | 0.16462    |   0.0 |  0.00
+Modify  | 0.30652    | 0.30652    | 0.30652    |   0.0 |  0.00
+Other   |            | 0.06527    |            |       |  0.00
+
+Nlocal:            750 ave         750 max         750 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           6489 ave        6489 max        6489 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:         269602 ave      269602 max      269602 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:       111422 ave      111422 max      111422 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 269602
+Ave neighs/atom = 359.46933
+Ave special neighs/atom = 0
+Neighbor list builds = 942
+Dangerous builds = 0
+
+#-------------------- End ----------------------------------------------------------------
+Total wall time: 2:05:31
