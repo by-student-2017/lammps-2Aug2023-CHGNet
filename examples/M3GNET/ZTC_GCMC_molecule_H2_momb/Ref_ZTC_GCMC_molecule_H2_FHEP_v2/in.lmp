@@ -28,13 +28,13 @@ read_data       data.lammps
 
 replicate 1 1 1
 
-molecule        my_one_gas ./molecular_files/H2_one.txt
-group           gas type 3
-variable        atoms_of_gas equal 0.5 # The number of atoms per gas molecule
+#mass 1 12.0107  # C
+#mass 2 1.00794  # H
+#mass 3 1.00794  # H
 
-mass 1 12.0107 # C
-mass 2 1.00794 # H
-mass 3 2.016   # H2
+molecule        my_one_gas ./molecular_files/H2.txt
+group           gas type 3
+variable        atoms_of_gas equal 2 # The number of atoms per gas molecule
 
 variable elem string "C H H2" # specifies the potential file used
 
@@ -42,19 +42,52 @@ variable elem string "C H H2" # specifies the potential file used
 variable overlap_cutoff_value equal 1.0
 
 #-------------------- Force field --------------------------------------------------------
-# case 1, Lennard-Jones (LJ) potential
-#pair_style hybrid airebo 3.0 1 0 lj/cut 10.2
-#pair_coeff * * airebo ./potentials/CH.airebo C H NULL
-#pair_coeff 1 3 lj/cut 0.003795 3.194 #   C-H2
-#pair_coeff 2 3 lj/cut 0.002456 2.764 #   H-H2
-#pair_coeff 3 3 lj/cut 0.003162 2.958 #  H2-H2
 
-# case 2, Feynman-Hibbs effective (FHE) potential
-pair_style hybrid airebo 3.0 1 0 table linear 1000
+#-------------------------------------------------------------------------
+# case 1, Lennard-Jones (LJ) potential + Coulomb interaction (in this case, 0 charges)
+#pair_style hybrid airebo 3.0 1 0 lj/cut/coul/long 14
+#pair_coeff * * airebo CH.airebo C H NULL
+
+# H2 case
+#pair_coeff 1 3 lj/cut/coul/long 0.002947 3.000 # C-H (H2)
+#pair_coeff 2 3 lj/cut/coul/long 0.001908 2.570 # H-H (H2)
+#pair_coeff 3 3 lj/cut/coul/long 0.001908 2.570 # H-H (H2)
+
+#kspace_style    ewald 1.0e-5
+#-------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------
+# case 2, Feynman-Hibbs effective (FHE) potential + Coulomb interaction (in this case, 0 charges)
+pair_style hybrid/overlay airebo 3.0 1 0 table linear 1000 ewald coul/cut 14
 pair_coeff * * airebo ./potentials/CH.airebo C H NULL
-pair_coeff 1 3 table  ./potentials/fhe_C-h2_303K.txt ENTRY
-pair_coeff 2 3 table  ./potentials/fhe_H-h2_303K.txt ENTRY
-pair_coeff 3 3 table  ./potentials/fhe_h2-h2_303K.txt ENTRY
+
+# H2 case
+pair_coeff 1 3 table  ./potentials/fhe_C-H_303K.txt ENTRY # C-H (H2)
+pair_coeff 2 3 table  ./potentials/fhe_H-H_303K.txt ENTRY # H-H (H2)
+pair_coeff 3 3 table  ./potentials/fhe_H-H_303K.txt ENTRY # H-H (H2)
+
+pair_coeff * 3 coul/cut
+#-------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------
+# Common settings (for case 1 or case 2)
+
+bond_style      morse # bond for N2 molecules
+bond_coeff      1       0       1.0       1.0    # dummy
+bond_coeff      2       0       1.0       1.0    # dummy
+bond_coeff      3   4.750162    1.93      0.741  # H2
+
+delete_bonds all bond  1*2 remove
+delete_bonds all angle 1*2 remove
+delete_bonds all dihedral 1*3 remove
+#-------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------
+# QEq method (Not recommend in this condition)
+#fix fq all qeq/slater 5 10 1.0e-6 100 qfile # alpha 0.2
+#fix fq all qeq/point 1 10 1.0e-6 200 qfile
+#fix fq all qeq/dynamic 1 12 1.0e-3 100 qfile
+#-------------------------------------------------------------------------
 
 #-------------------- Energy Minimization (failed) ---------------------------------------
 # Note: ERROR: Fix gcmc region extends outside simulation box (../fix_gcmc.cpp:486)
