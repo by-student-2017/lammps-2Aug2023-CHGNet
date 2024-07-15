@@ -10,6 +10,10 @@ Windows WSL (C drive): /mnt/c/lammps, "/mnt/d" => "/mnt/c"
 
 Windows WSL (D drive): /mnt/d/lammps
 
+git clone https://github.com/by-student-2017/lammps-2Aug2023-CHGNet.git
+
+mv lammps-2Aug2023-CHGNet lammps
+
 ----- Note 1 -----
 
 If you want to calculate an interface with an applied electric field, we recommend that you use QEq to calculate with the original state (advancesoftcorp/lammps).
